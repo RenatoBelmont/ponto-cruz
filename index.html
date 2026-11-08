@@ -1,0 +1,1306 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="escuro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1c1c1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Ponto Cruz">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>Ponto Cruz — Planejador</title>
+<style>
+:root{--bg:#141416;--sf:#1c1c1f;--sf2:#242428;--bd:#2f2f35;--tx:#ececef;--mu:#9b9ba5;--ac:#e8875b;--ok:#5bbf8a;--warn:#e6b450;--err:#e5646b;--c1:#e8875b;--c2:#4fb3a9;--c3:#e6b450;--c4:#a48be0;--r:14px;--paper:#fbf9f3}
+[data-tema=claro]{--bg:#f3f2ee;--sf:#ffffff;--sf2:#f5f4f0;--bd:#e2e0d9;--tx:#1d1d20;--mu:#6b6b73}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+canvas{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--bd);background:var(--sf);position:sticky;top:0;z-index:20;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:.2px}
+.logo svg{display:block}
+#nome{background:transparent;border:1px solid transparent;border-radius:8px;padding:5px 9px;font-weight:600;min-width:120px;max-width:260px}
+#nome:hover,#nome:focus{border-color:var(--bd);outline:none;background:var(--sf2)}
+#status{color:var(--mu);font-size:12px;margin-right:auto;display:flex;align-items:center;gap:6px}
+#status i{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block}
+#status.pend i{background:var(--warn)}
+.btn{background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:border-color .15s,background .15s}
+.btn:hover{border-color:color-mix(in srgb,var(--ac) 55%,var(--bd))}
+.btn.pri{background:var(--ac);border-color:var(--ac);color:#1b1410;font-weight:600}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.sm{padding:5px 9px;font-size:13px}
+.btn.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 16%,var(--sf2))}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+nav{display:flex;gap:4px;padding:10px 20px 0;max-width:1440px;margin:0 auto}
+nav button{background:none;border:none;border-bottom:2px solid transparent;padding:9px 14px;cursor:pointer;color:var(--mu);display:flex;align-items:center;gap:8px;font-weight:600}
+nav button .d{width:8px;height:8px;border-radius:50%;background:var(--cc)}
+nav button.on{color:var(--tx);border-bottom-color:var(--cc)}
+nav button:hover{color:var(--tx)}
+.stats{display:flex;gap:10px;flex-wrap:wrap;padding:12px 20px 0;max-width:1440px;margin:0 auto}
+.stat{background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:8px 14px;min-width:120px}
+.stat small{display:block;color:var(--mu);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+.stat b{font-size:15px}
+main{max-width:1440px;margin:0 auto;padding:16px 20px 40px}
+.aba{display:none}.aba.on{display:block}
+.g2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:16px;align-items:start}
+.g2e{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:960px){.g2,.g2e{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;transition:border-color .2s,box-shadow .25s;margin-bottom:16px}
+.card:hover{border-color:color-mix(in srgb,var(--cc,var(--ac)) 45%,var(--bd));box-shadow:0 0 0 1px color-mix(in srgb,var(--cc,var(--ac)) 18%,transparent),0 14px 40px -22px var(--cc,var(--ac))}
+.card h3{margin:0 0 12px;font-size:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.6px}
+.card h3 .d{width:8px;height:8px;border-radius:50%;background:var(--cc,var(--ac))}
+.card h3 .sp{margin-left:auto}
+.muted{color:var(--mu)}
+.hint{color:var(--mu);font-size:12.5px;margin:6px 0 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label,.lbl{font-size:11.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.f input[type=number],.f input[type=text],.f select,textarea,.inp{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:7px 9px;width:100%;min-width:0}
+.f input:focus,.f select:focus,textarea:focus,.inp:focus{outline:none;border-color:var(--ac)}
+.f.n{width:92px}
+.chk{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.chk input{accent-color:var(--ac);width:16px;height:16px}
+.sep{height:1px;background:var(--bd);margin:14px 0}
+.drop{border:1.5px dashed var(--bd);border-radius:12px;padding:26px;text-align:center;color:var(--mu);cursor:pointer;transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 7%,transparent)}
+.cropwrap{position:relative;border-radius:10px;overflow:hidden;background:repeating-conic-gradient(#0000 0 25%,#8881 0 50%) 0 0/16px 16px;touch-action:none}
+#cropCv{display:block;width:100%;cursor:crosshair}
+.prevbox{background:var(--paper);border-radius:10px;padding:10px;display:flex;justify-content:center}
+.prevbox canvas{max-width:100%;image-rendering:pixelated}
+.toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar .gap{width:1px;height:24px;background:var(--bd);margin:0 4px}
+.edwrap{overflow:auto;max-height:74vh;border-radius:10px;background:var(--sf2);padding:12px}
+#edCv{display:block;margin:auto;background:var(--paper)}
+.leg{display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow:auto;margin:0 -6px;padding:0 6px}
+.li{display:grid;grid-template-columns:30px 74px 1fr auto auto;gap:8px;align-items:center;padding:6px;border-radius:9px;border:1px solid transparent;cursor:pointer}
+.li:hover{background:var(--sf2)}
+.li.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 10%,var(--sf2))}
+.sw{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:1px solid #0003}
+.li input{background:var(--sf2);border:1px solid var(--bd);border-radius:6px;padding:4px 6px;width:74px;font-size:13px}
+.li .nm{font-size:12.5px;line-height:1.2;overflow:hidden}
+.li .nm small{color:var(--mu);display:block}
+.li .ct{font-size:12px;text-align:right;color:var(--mu)}
+.x{background:none;border:none;color:var(--mu);cursor:pointer;padding:4px 6px;border-radius:6px}
+.x:hover{color:var(--err);background:var(--sf)}
+.warn{border-left:3px solid var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent);padding:8px 11px;border-radius:7px;font-size:13px;margin-top:8px}
+.warn.err{border-color:var(--err);background:color-mix(in srgb,var(--err) 10%,transparent)}
+.warn.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13.5px}
+.kv span:nth-child(odd){color:var(--mu)}
+.chartwrap{overflow:auto;background:#fff;border-radius:10px;max-height:78vh}
+#chartCv{display:block}
+table.tl{width:100%;border-collapse:collapse;font-size:13px}
+table.tl th{text-align:left;color:var(--mu);font-weight:500;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;padding:6px;border-bottom:1px solid var(--bd)}
+table.tl td{padding:6px;border-bottom:1px solid var(--bd)}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal.on{display:flex}
+.modal .box{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px;max-width:420px;width:100%}
+.modal .box p{margin:0 0 16px}
+.modal .acts{display:flex;gap:8px;justify-content:flex-end}
+#printArea{display:none}
+body.foco header,body.foco nav,body.foco .stats{display:none}
+body.foco main{max-width:none;padding:8px}
+body.foco #aba-editor .g2e{gap:8px;grid-template-columns:minmax(0,1fr) 300px}
+body.foco #aba-editor .card{margin-bottom:8px;padding:10px}
+body.foco #cardTam,body.foco #edInfo,body.foco #hintLeg{display:none}
+body.foco .edwrap{height:calc(100vh - 86px);height:calc(100dvh - 86px);max-height:none}
+body.foco .leg{max-height:calc(100vh - 210px);max-height:calc(100dvh - 210px)}
+body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 16%,var(--sf2))}
+@media (max-width:820px){body.foco #aba-editor .g2e{grid-template-columns:minmax(0,1fr)}body.foco .card h3 .sp~*{display:none}body.foco .edwrap{height:calc(100dvh - 230px)}body.foco .leg{max-height:120px;flex-direction:row;flex-wrap:wrap}body.foco .li{grid-template-columns:30px}body.foco .li>:not(.sw){display:none}}
+.codebox{display:flex;align-items:center;gap:8px}
+.prevsq{width:34px;height:34px;flex:none;border-radius:8px;border:1px solid var(--bd);background:repeating-conic-gradient(#0000 0 25%,#8883 0 50%) 0 0/10px 10px}
+.prevsq.vazio{background:repeating-conic-gradient(#0000 0 25%,#8883 0 50%) 0 0/10px 10px}
+.pick{position:fixed;z-index:70;touch-action:pan-y;overscroll-behavior:contain;background:var(--sf);border:1px solid var(--bd);border-radius:12px;box-shadow:0 18px 50px -12px #000c;overflow:auto;padding:4px;-webkit-overflow-scrolling:touch}
+.pick div{display:grid;grid-template-columns:24px 58px 1fr;gap:9px;align-items:center;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:13px}
+.pick div:hover{background:var(--sf2)}
+.pick div.on{background:color-mix(in srgb,var(--ac) 16%,var(--sf2))}
+.pick i{width:24px;height:24px;border-radius:6px;border:1px solid #0003;display:block}
+.pick span{color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media print{
+  body{background:#fff}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+  #printArea img{width:100%;height:auto}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg width="26" height="26" viewBox="0 0 26 26"><rect x="1" y="1" width="24" height="24" rx="6" fill="none" stroke="var(--ac)" stroke-width="1.6"/><path d="M7 7l12 12M19 7L7 19" stroke="var(--ac)" stroke-width="2.4" stroke-linecap="round"/></svg>
+    Ponto Cruz
+  </div>
+  <input id="nome" type="text" value="Sem título" aria-label="Nome do projeto">
+  <select id="material" class="inp" style="width:auto;padding:6px 9px" aria-label="Material"><option value="dmc">✕ Ponto cruz</option><option value="hama">● Hama Beads</option></select>
+  <div id="status"><i></i><span>Salvo localmente</span></div>
+  <button class="btn sm" id="bNovo">Novo</button>
+  <button class="btn sm" id="bAbrir">Abrir .json</button>
+  <button class="btn sm" id="bSalvar">Salvar .json</button>
+  <button class="btn sm" id="bTema" title="Alternar tema claro/escuro">Tema</button>
+  <input type="file" id="fJson" accept=".json,application/json" hidden>
+</header>
+
+<nav id="tabs">
+  <button data-aba="importar" style="--cc:var(--c1)" class="on"><span class="d"></span>1 · Importar</button>
+  <button data-aba="editor" style="--cc:var(--c2)"><span class="d"></span>2 · Editor</button>
+  <button data-aba="grade" style="--cc:var(--c3)"><span class="d"></span>3 · Peça</button>
+  <button data-aba="grafico" style="--cc:var(--c4)"><span class="d"></span>4 · Gráfico</button>
+</nav>
+
+<div class="stats" id="stats"></div>
+
+<main>
+<!-- IMPORTAR -->
+<section class="aba on" id="aba-importar">
+  <div class="g2">
+    <div>
+      <div class="card" style="--cc:var(--c1)">
+        <h3><span class="d"></span>Imagem de origem<span class="sp"></span><button class="btn sm" id="bTrocarImg" hidden>Trocar imagem</button></h3>
+        <div class="drop" id="drop">Arraste uma imagem aqui ou <b>toque para escolher</b><br><small>PNG, JPG ou WEBP — foto, desenho, pixel art ou um gráfico pronto</small></div>
+        <input type="file" id="fImg" accept="image/*" hidden>
+        <div id="cropArea" hidden>
+          <div class="cropwrap"><canvas id="cropCv"></canvas></div>
+          <p class="hint">Arraste sobre a imagem para recortar. A grade laranja mostra onde cada ponto vai cair — se a imagem já for um gráfico, ajuste até as linhas baterem com os quadradinhos dela.</p>
+          <div class="row" style="margin-top:10px">
+            <div class="f n"><label>X</label><input type="text" inputmode="decimal" autocomplete="off" id="cX"></div>
+            <div class="f n"><label>Y</label><input type="text" inputmode="decimal" autocomplete="off" id="cY"></div>
+            <div class="f n"><label>Largura</label><input type="text" inputmode="decimal" autocomplete="off" id="cW"></div>
+            <div class="f n"><label>Altura</label><input type="text" inputmode="decimal" autocomplete="off" id="cH"></div>
+            <button class="btn sm pri" id="bCortar" title="Recorta a imagem na seleção e amplia, para ajustar com mais precisão">✂ Cortar seleção</button>
+            <button class="btn sm" id="bDescortar" disabled>↶ Desfazer corte</button>
+            <button class="btn sm" id="bCropAll">Selecionar tudo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="--cc:var(--c1)">
+        <h3><span class="d"></span>Conversão</h3>
+        <div class="row">
+          <div class="f n"><label>Colunas</label><input type="text" inputmode="decimal" autocomplete="off" id="vW"></div>
+          <div class="f n"><label>Linhas</label><input type="text" inputmode="decimal" autocomplete="off" id="vH"></div>
+          <label class="chk" style="margin-bottom:8px"><input type="checkbox" id="vLock"> manter proporção do recorte</label>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="f" style="flex:1"><label>Amostragem</label>
+            <select id="vAmostra">
+              <option value="media">Média da célula (fotos e desenhos)</option>
+              <option value="centro">Centro da célula (gráficos prontos, ignora linhas)</option>
+            </select></div>
+          <div class="f n"><label>Máx. cores</label><input type="text" inputmode="decimal" autocomplete="off" id="vMax"></div>
+        </div>
+        <div class="f" style="margin-top:10px"><label id="lblCores">Linhas DMC permitidas</label>
+          <select id="vPaleta">
+            <option value="todas" id="optTodas">Todas as cores DMC do catálogo</option>
+            <option value="lista" id="optLista">Só as linhas desta lista ↓</option>
+          </select></div>
+        <div class="f" id="listaBox" style="margin-top:8px"><textarea id="vCodigos" rows="2" placeholder="Ex.: B5200 747 518 762 414 3799 721 666 3777 3346 699 727"></textarea>
+          <span class="hint" id="hintLista">Códigos separados por espaço ou vírgula — use as linhas que você já tem.</span></div>
+        <div class="sep"></div>
+        <label class="chk"><input type="checkbox" id="vFundo"> Remover fundo (vira tecido sem ponto)</label>
+        <div class="row" id="fundoBox" style="margin-top:8px">
+          <div class="f"><label>Cor do fundo</label><input type="color" id="vFundoCor" class="inp" style="height:36px;width:70px;padding:3px"></div>
+          <div class="f" style="flex:1"><label>Tolerância <span id="tolV" class="mono"></span></label><input type="range" id="vTol" min="2" max="40"></div>
+          <button class="btn sm" id="bPickFundo" title="Toque na imagem para pegar a cor do fundo">Pegar da imagem</button>
+        </div>
+        <label class="chk" style="margin-top:10px"><input type="checkbox" id="vLimpar"> Limpar pontos isolados</label>
+        <div class="sep"></div>
+        <div class="lbl" style="margin-bottom:6px">Prévia</div>
+        <div class="prevbox"><canvas id="prevCv" width="10" height="10"></canvas></div>
+        <p class="hint" id="prevInfo"></p>
+        <button class="btn pri" id="bAplicar" style="width:100%;justify-content:center;margin-top:10px" disabled>Usar no gráfico →</button>
+        <div class="sep"></div>
+        <div class="row">
+          <span class="muted" style="flex:1;font-size:13px">Ou comece do zero com a grade em branco do tamanho acima.</span>
+          <button class="btn sm" id="bBranco">Grade em branco</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EDITOR -->
+<section class="aba" id="aba-editor">
+  <div class="g2e">
+    <div class="card" style="--cc:var(--c2)">
+      <div class="toolbar" id="tools">
+        <button class="btn sm" data-t="mover" title="Mover / rolar (M)">✋ Mover</button>
+        <button class="btn sm on" data-t="lapis" title="Pintar (B)">✎ Lápis</button>
+        <button class="btn sm" data-t="borracha" title="Apagar (E)">⌫ Borracha</button>
+        <button class="btn sm" data-t="balde" title="Preencher área (G)">◧ Balde</button>
+        <button class="btn sm" data-t="conta" title="Pegar cor do gráfico (I)">⊙ Conta-gotas</button>
+        <button class="btn sm" data-t="feito" title="Marcar pontos já feitos — toque de novo para desmarcar (D)">✓ Feito</button>
+        <span class="gap"></span>
+        <button class="btn sm" id="bUndo" title="Desfazer">↶</button>
+        <button class="btn sm" id="bRedo" title="Refazer">↷</button>
+        <span class="gap"></span>
+        <button class="btn sm" id="bZm">−</button>
+        <span class="mono muted" id="zoomV" style="min-width:42px;text-align:center"></span>
+        <button class="btn sm" id="bZp">+</button>
+        <button class="btn sm" id="bFit" title="Ajustar o gráfico à tela (0)">⤢ Ajustar</button>
+        <span class="gap"></span>
+        <label class="chk" title="Apaga as outras cores para você ver só onde vai a cor selecionada (S)"><input type="checkbox" id="eDest"> Destacar cor</label>
+        <span class="gap"></span>
+        <button class="btn sm" id="bFull" title="Tela cheia (F) — Esc sai">⛶ Tela cheia</button>
+        <span class="gap"></span>
+        <label class="chk"><input type="checkbox" id="eSim"> Símbolos</label>
+        <label class="chk"><input type="checkbox" id="eCor"> Cores</label>
+        <span class="gap"></span>
+        <button class="btn sm" id="bPen" title="Ligado: só a Apple Pencil pinta; dedo e palma da mão só arrastam e dão zoom">✎ Apple Pencil: <b id="penTxt">desligado</b></button>
+      </div>
+      <div class="edwrap" id="edWrap"><canvas id="edCv"></canvas></div>
+      <p class="hint" id="edInfo">&nbsp;</p>
+    </div>
+    <div>
+      <div class="card" style="--cc:var(--c2)">
+        <h3><span class="d"></span><span id="legTit">Legenda DMC</span><span class="sp"></span><button class="btn sm" id="bLimparCores" title="Remover cores sem nenhum ponto">Limpar não usadas</button></h3>
+        <div class="leg" id="leg"></div>
+        <div class="sep"></div>
+        <div class="row">
+          <div class="f" style="flex:1"><label id="lblAdd">Adicionar linha</label><div class="codebox"><span class="prevsq" id="addPrev"></span><input type="text" id="addCod" placeholder="toque para escolher" class="inp" autocomplete="off"></div></div>
+          <button class="btn sm" id="bAdd">Adicionar</button>
+        </div>
+        <p class="hint" id="hintLeg">Toque no código de uma cor para trocar a linha. Se a nova já existir na legenda, as duas se juntam.</p>
+      </div>
+      <div class="card" id="cardTam" style="--cc:var(--c2)">
+        <h3><span class="d"></span>Tamanho da grade</h3>
+        <div class="row">
+          <div class="f n"><label>Colunas</label><input type="text" inputmode="decimal" autocomplete="off" id="rW"></div>
+          <div class="f n"><label>Linhas</label><input type="text" inputmode="decimal" autocomplete="off" id="rH"></div>
+          <button class="btn sm" id="bResize">Aplicar</button>
+        </div>
+        <p class="hint">Aumenta ou corta a grade mantendo o desenho centralizado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRADE 3D -->
+<section class="aba" id="aba-grade">
+  <div class="g2">
+    <div class="card" style="--cc:var(--c3)">
+      <h3><span class="d"></span><span id="pecaTit">Prévia do bordado na grade</span></h3>
+      <div class="prevbox" style="background:var(--sf2)"><canvas id="plateCv" width="10" height="10"></canvas></div>
+      <p class="hint" id="pecaHint">Vista de cima, em escala. Cada ponto em X liga 4 furos vizinhos, então a grade tem um furo a mais que o desenho em cada direção.</p>
+    </div>
+    <div>
+      <div id="pecaHama" hidden>
+      <div class="card" style="--cc:var(--c3)">
+        <h3><span class="d"></span>Placas Hama Midi</h3>
+        <div class="row">
+          <div class="f n"><label>Pinos/placa</label><input type="text" inputmode="numeric" id="hPlaca"></div>
+          <span class="muted" style="flex:1;font-size:12.5px">A placa quadrada grande Midi tem 29 × 29 pinos (≈ 14,5 cm). Encaixe as placas lado a lado e passe o ferro no desenho inteiro de uma vez.</span>
+        </div>
+        <div class="sep"></div>
+        <div class="kv" id="hInfo"></div>
+        <div class="sep"></div>
+        <div class="lbl" style="margin-bottom:6px">Contas por placa</div>
+        <div id="hPlacas" style="font-size:13px"></div>
+      </div>
+      </div>
+      <div id="pecaDMC">
+      <div class="card" style="--cc:var(--c3)">
+        <h3><span class="d"></span>Medidas da grade</h3>
+        <div class="row">
+          <div class="f n"><label>Passo (mm)</label><input type="text" inputmode="decimal" id="gPasso"></div>
+          <div class="f n"><label>Furo (mm)</label><input type="text" inputmode="decimal" id="gFuro"></div>
+          <div class="f n"><label>Espessura</label><input type="text" inputmode="decimal" id="gEsp"></div>
+          <div class="f n"><label>Parede</label><input type="text" inputmode="decimal" id="gParede"></div>
+          <div class="f n"><label>Folga tampa</label><input type="text" inputmode="decimal" id="gFolga"></div>
+          <div class="f n"><label>Borda s/ furos</label><input type="text" inputmode="decimal" id="gBorda"></div>
+          <div class="f n"><label>Mesa (mm)</label><input type="text" inputmode="numeric" id="gMesa"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="f" style="flex:1"><label>Predefinição</label>
+            <select id="gPreset">
+              <option value="">— escolher —</option>
+              <option value="1.8,1">Aida 14 (1,8 mm)</option>
+              <option value="2.3,1.2">Aida 11 (2,3 mm)</option>
+              <option value="2.5,1.3">Aida 10 · padrão do Workbench (2,5 mm)</option>
+              <option value="3.2,1.6">Aida 8 (3,2 mm)</option>
+              <option value="4,2">Grossa (4 mm, máximo do Workbench)</option>
+            </select></div>
+          <div class="f n"><label>Fios</label><input type="text" inputmode="numeric" id="gFios"></div>
+        </div>
+        <label class="chk" style="margin-top:10px"><input type="checkbox" id="gAparar"> Caixa só do tamanho do desenho (ignora bordas vazias da grade)</label>
+        <p class="hint">Parede, folga e borda são os mesmos campos da Caixa do Workbench — deixe iguais nos dois. Passo = distância entre furos. Fios = quantos fios da meada vão juntos na agulha (entra na conta de meadas, com 15% de sobra).</p>
+        <div class="sep"></div>
+        <div class="kv" id="gInfo"></div>
+        <div id="gAvisos"></div>
+      </div>
+      <div class="card" style="--cc:var(--c3)">
+        <h3><span class="d"></span>Levar para o 3D Workbench</h3>
+        <p class="muted" style="margin:0 0 12px;font-size:13px">Exporte o .json e abra no Workbench em <b>Projetos salvos → Importar do Ponto Cruz</b>. Ele monta a <b>Caixa com tampa de ponto cruz</b> já no tamanho certo para caber todos os furos do desenho, com o passo e o furo daqui.</p>
+        <div class="row">
+          <button class="btn" id="bCopiarMed">Copiar medidas</button>
+          <button class="btn pri" id="bExpGrade">Exportar para o Workbench (.json)</button>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRÁFICO -->
+<section class="aba" id="aba-grafico">
+  <div class="card" style="--cc:var(--c4)">
+    <h3><span class="d"></span><span id="grafTit">Gráfico para bordar</span><span class="sp"></span>
+      <label class="chk" style="text-transform:none;letter-spacing:0;font-weight:400"><input type="checkbox" id="kCor" checked> colorido</label>
+      <button class="btn sm" id="bPNG">Baixar PNG</button>
+      <button class="btn sm pri" id="bPrint">Imprimir</button>
+    </h3>
+    <div class="chartwrap"><canvas id="chartCv"></canvas></div>
+  </div>
+</section>
+</main>
+
+<div class="modal" id="modal"><div class="box"><p id="mMsg"></p><div class="acts"><button class="btn" id="mNo">Cancelar</button><button class="btn pri" id="mSim">Confirmar</button></div></div></div>
+<div id="printArea"><img id="printImg" alt=""></div>
+
+<script>
+'use strict';
+const DMC_RAW=`310|Black|0 0 0
+B5200|Snow White|255 255 255
+White|White|252 251 248
+Ecru|Ecru|240 234 218
+150|Dusty Rose Ult VY DK|171 2 73
+151|Dusty Rose VY LT|240 206 212
+152|Shell Pink Med LT|226 160 153
+153|Violet VY LT|230 204 217
+154|Grape VY DK|87 36 51
+155|Blue Violet Med DK|152 145 182
+156|Blue Violet Med LT|163 174 209
+157|Cornflower Blue VY LT|187 195 217
+158|Cornflower Blue Med VY DK|76 82 110
+159|Blue Gray LT|199 202 215
+160|Blue Gray Med|153 159 183
+161|Blue Gray|120 128 164
+162|Blue Ultra VY LT|219 236 245
+163|Celadon Green MD|77 131 97
+164|Forest Green LT|200 216 184
+165|Moss Green VY LT|239 244 164
+166|Moss Green MD LT|192 200 64
+167|Yellow Beige VY DK|167 124 73
+168|Pewter VY LT|209 209 209
+169|Pewter LT|132 132 132
+208|Lavender VY DK|131 91 139
+209|Lavender DK|163 123 167
+210|Lavender MD|195 159 195
+211|Lavender LT|227 203 227
+221|Shell Pink VY DK|136 62 67
+223|Shell Pink LT|204 132 124
+224|Shell Pink VY LT|235 183 175
+225|Shell Pink Ult VY LT|255 223 213
+300|Mahogany VY DK|111 47 0
+301|Mahogany MD|179 95 43
+304|Red MD|183 31 51
+307|Lemon|253 237 84
+309|Rose DK|186 74 74
+311|Wedgewood Ult VY DK|28 80 102
+312|Baby Blue VY DK|53 102 139
+315|Antique Mauve MD VY DK|129 73 82
+316|Antique Mauve MD|183 115 127
+317|Pewter Gray|108 108 108
+318|Steel Gray LT|171 171 171
+319|Pistachio Green VY DK|32 95 46
+320|Pistachio Green MD|105 136 90
+321|Red|199 43 59
+322|Baby Blue DK|90 143 184
+326|Rose VY DK|179 59 75
+327|Violet DK|99 54 102
+333|Blue Violet VY DK|92 84 120
+334|Baby Blue MD|115 159 193
+335|Rose|238 84 110
+336|Navy Blue|37 59 115
+340|Blue Violet MD|173 167 199
+341|Blue Violet LT|183 191 221
+347|Salmon VY DK|191 45 45
+349|Coral DK|210 16 53
+350|Coral MD|224 72 72
+351|Coral|233 106 103
+352|Coral LT|253 156 151
+353|Peach|254 215 204
+355|Terra Cotta DK|152 68 54
+356|Terra Cotta MD|197 106 91
+367|Pistachio Green DK|97 122 82
+368|Pistachio Green LT|166 194 152
+369|Pistachio Green VY LT|215 237 204
+370|Mustard MD|184 157 100
+371|Mustard|191 166 113
+372|Mustard LT|204 183 132
+400|Mahogany DK|143 67 15
+402|Mahogany VY LT|247 167 119
+407|Desert Sand DK|187 129 97
+413|Pewter Gray DK|86 86 86
+414|Steel Gray DK|140 140 140
+415|Pearl Gray|211 211 214
+420|Hazelnut Brown DK|160 112 66
+422|Hazelnut Brown LT|198 159 123
+433|Brown MD|122 69 31
+434|Brown LT|152 94 51
+435|Brown VY LT|184 119 72
+436|Tan|203 144 81
+437|Tan LT|228 187 142
+444|Lemon DK|255 214 0
+445|Lemon LT|255 251 139
+451|Shell Gray DK|145 123 115
+452|Shell Gray MD|192 179 174
+453|Shell Gray LT|215 206 203
+469|Avocado Green|114 132 60
+470|Avocado Green LT|148 171 79
+471|Avocado Green VY LT|174 191 121
+472|Avocado Green Ult LT|216 228 152
+498|Red DK|167 19 43
+500|Blue Green VY DK|4 77 51
+501|Blue Green DK|57 111 82
+502|Blue Green|91 144 113
+503|Blue Green MD|123 172 148
+504|Blue Green VY LT|196 222 204
+517|Wedgewood DK|59 118 143
+518|Wedgewood LT|79 147 167
+519|Sky Blue|126 177 200
+520|Fern Green DK|102 109 79
+522|Fern Green|150 158 126
+523|Fern Green LT|171 177 151
+524|Fern Green VY LT|196 205 172
+535|Ash Gray VY LT|99 100 88
+543|Beige Brown Ult VY LT|242 227 206
+550|Violet VY DK|92 24 78
+552|Violet MD|128 58 107
+553|Violet|163 99 139
+554|Violet LT|219 179 203
+561|Jade VY DK|44 106 69
+562|Jade MD|83 151 106
+563|Jade LT|143 192 152
+564|Jade VY LT|167 205 175
+580|Moss Green DK|136 141 51
+581|Moss Green|167 174 56
+597|Turquoise|91 163 179
+598|Turquoise LT|144 195 204
+600|Cranberry VY DK|205 47 99
+601|Cranberry DK|209 40 106
+602|Cranberry MD|226 72 116
+603|Cranberry|255 164 190
+604|Cranberry LT|255 176 190
+605|Cranberry VY LT|255 192 205
+606|Bright Orange-Red|250 50 3
+608|Bright Orange|253 93 53
+610|Drab Brown DK|121 96 71
+611|Drab Brown|150 118 86
+612|Drab Brown LT|188 154 120
+613|Drab Brown VY LT|220 196 170
+632|Desert Sand Ult VY DK|135 85 57
+640|Beige Gray VY DK|133 123 97
+642|Beige Gray DK|164 152 120
+644|Beige Gray MD|221 216 203
+645|Beaver Gray VY DK|110 101 92
+646|Beaver Gray DK|135 125 115
+647|Beaver Gray MD|176 166 156
+648|Beaver Gray LT|188 180 172
+666|Bright Red|227 29 66
+676|Old Gold LT|229 206 151
+677|Old Gold VY LT|245 236 203
+680|Old Gold DK|188 141 14
+699|Green|5 101 23
+700|Green Bright|7 115 27
+701|Green LT|63 143 41
+702|Kelly Green|71 167 47
+703|Chartreuse|123 181 71
+704|Chartreuse Bright|158 207 52
+712|Cream|255 251 239
+718|Plum|156 36 98
+720|Orange Spice DK|229 92 31
+721|Orange Spice MD|242 120 66
+722|Orange Spice LT|247 151 111
+725|Topaz MD Ult|255 200 64
+726|Topaz LT|253 215 85
+727|Topaz VY LT|255 241 175
+728|Topaz|228 180 104
+729|Old Gold MD|208 165 62
+730|Olive Green VY DK|130 123 48
+732|Olive Green|148 140 54
+733|Olive Green MD|188 179 76
+734|Olive Green LT|199 192 119
+738|Tan VY LT|236 204 158
+739|Tan Ult VY LT|248 228 200
+740|Tangerine|255 139 0
+741|Tangerine MD|255 163 43
+742|Tangerine LT|255 191 87
+743|Yellow MD|254 211 118
+744|Yellow Pale|255 231 147
+745|Yellow LT Pale|255 233 173
+746|Off White|252 252 238
+747|Peacock Blue VY LT|229 252 253
+754|Peach LT|247 203 191
+758|Terra Cotta VY LT|238 170 155
+760|Salmon|245 173 173
+761|Salmon LT|255 201 201
+762|Pearl Gray VY LT|236 236 236
+772|Yellow Green VY LT|228 236 212
+775|Baby Blue VY LT|217 235 241
+776|Pink MD|252 176 185
+778|Antique Mauve VY LT|223 179 187
+780|Topaz Ult VY DK|148 99 26
+781|Topaz VY DK|162 109 32
+782|Topaz DK|174 119 32
+783|Topaz MD|206 145 36
+791|Cornflower Blue VY DK|70 69 99
+792|Cornflower Blue DK|85 91 123
+793|Cornflower Blue MD|112 125 162
+794|Cornflower Blue LT|143 156 193
+796|Royal Blue DK|17 65 109
+797|Royal Blue|19 71 125
+798|Delft Blue DK|70 106 142
+799|Delft Blue MD|116 142 182
+800|Delft Blue Pale|192 204 222
+801|Coffee Brown DK|101 57 25
+803|Baby Blue Ult VY DK|44 89 124
+806|Peacock Blue DK|61 149 165
+807|Peacock Blue|100 171 186
+809|Delft Blue|148 168 198
+813|Blue LT|161 194 215
+814|Garnet DK|123 0 27
+815|Garnet MD|135 7 31
+816|Garnet|151 11 35
+817|Coral Red VY DK|187 5 31
+818|Baby Pink|255 223 217
+819|Baby Pink LT|255 238 235
+820|Royal Blue VY DK|14 54 92
+822|Beige Gray LT|231 226 211
+823|Navy Blue DK|33 48 99
+824|Blue VY DK|57 105 135
+825|Blue DK|71 129 165
+826|Blue MD|107 158 191
+827|Blue VY LT|189 221 237
+828|Sky Blue VY LT|197 232 237
+829|Golden Olive VY DK|126 107 66
+830|Golden Olive DK|141 120 75
+831|Golden Olive MD|170 143 86
+832|Golden Olive|189 155 81
+833|Golden Olive LT|200 171 108
+834|Golden Olive VY LT|219 190 127
+838|Beige Brown VY DK|89 73 55
+839|Beige Brown DK|103 85 65
+840|Beige Brown MD|154 124 92
+841|Beige Brown LT|182 155 126
+842|Beige Brown VY LT|209 186 161
+844|Beaver Brown Ult DK|72 72 72
+869|Hazelnut Brown VY DK|131 94 57
+890|Pistachio Green Ult VY DK|23 73 35
+891|Carnation DK|255 87 115
+892|Carnation MD|255 121 140
+893|Carnation LT|252 144 162
+894|Carnation VY LT|255 178 187
+895|Hunter Green VY DK|27 83 0
+898|Coffee Brown VY DK|73 42 19
+899|Rose MD|242 118 136
+900|Burnt Orange DK|209 88 7
+902|Garnet VY DK|130 38 55
+904|Parrot Green VY DK|85 120 34
+905|Parrot Green DK|98 138 40
+906|Parrot Green MD|127 179 53
+907|Parrot Green LT|199 230 102
+909|Emerald Green VY DK|21 111 73
+910|Emerald Green DK|24 126 86
+911|Emerald Green MD|24 144 101
+912|Emerald Green LT|27 157 107
+913|Nile Green MD|109 171 119
+915|Plum DK|130 0 67
+917|Plum MD|155 19 89
+918|Red Copper DK|130 52 10
+919|Red Copper|166 69 16
+920|Copper MD|172 84 20
+921|Copper|198 98 24
+922|Copper LT|226 115 35
+924|Gray Green VY DK|86 106 106
+926|Gray Green MD|152 174 174
+927|Gray Green LT|189 203 203
+928|Gray Green VY LT|221 227 227
+930|Antique Blue DK|69 92 113
+931|Antique Blue MD|106 133 158
+932|Antique Blue LT|162 181 198
+934|Avocado Green Black|49 57 25
+935|Avocado Green DK|66 77 33
+936|Avocado Green VY DK|76 88 38
+937|Avocado Green MD|98 113 51
+938|Coffee Brown Ult DK|54 31 14
+939|Navy Blue VY DK|27 40 83
+943|Aquamarine MD|61 147 132
+945|Tawny|251 213 187
+946|Burnt Orange MD|235 99 7
+947|Burnt Orange|255 123 77
+948|Peach VY LT|254 231 218
+950|Desert Sand LT|238 211 196
+951|Tawny LT|255 226 207
+954|Nile Green|136 186 145
+955|Nile Green LT|162 214 173
+956|Geranium|255 145 145
+957|Geranium Pale|253 181 181
+958|Sea Green DK|62 182 161
+959|Sea Green MD|89 199 180
+961|Dusty Rose DK|207 115 115
+962|Dusty Rose MD|230 138 138
+963|Dusty Rose Ult VY LT|255 215 215
+964|Sea Green LT|169 226 216
+966|Jade Ult VY LT|185 215 192
+970|Pumpkin LT|247 139 19
+971|Pumpkin|246 127 0
+972|Canary Deep|255 181 21
+973|Canary Bright|255 227 0
+975|Golden Brown DK|145 79 18
+976|Golden Brown MD|194 129 66
+977|Golden Brown LT|220 156 86
+986|Forest Green VY DK|64 82 48
+987|Forest Green DK|88 113 65
+988|Forest Green MD|115 139 91
+989|Forest Green|141 166 117
+991|Aquamarine DK|71 123 110
+992|Aquamarine LT|111 174 159
+993|Aquamarine VY LT|144 192 180
+995|Electric Blue DK|38 150 182
+996|Electric Blue MD|48 194 236
+3011|Khaki Green DK|137 138 88
+3012|Khaki Green MD|166 167 93
+3013|Khaki Green LT|185 185 130
+3021|Brown Gray VY DK|79 75 65
+3022|Brown Gray MD|142 144 120
+3023|Brown Gray LT|177 170 151
+3024|Brown Gray VY LT|235 234 231
+3031|Mocha Brown VY DK|75 60 42
+3032|Mocha Brown MD|179 159 139
+3033|Mocha Brown VY LT|227 216 204
+3045|Yellow Beige DK|188 150 106
+3046|Yellow Beige MD|216 188 154
+3047|Yellow Beige LT|231 214 193
+3064|Desert Sand|196 142 112
+3072|Beaver Gray VY LT|230 232 232
+3078|Golden Yellow VY LT|253 249 205
+3325|Baby Blue LT|184 210 230
+3326|Rose LT|251 173 180
+3328|Salmon DK|227 109 109
+3340|Apricot MD|255 131 111
+3341|Apricot|252 171 152
+3345|Hunter Green DK|27 89 21
+3346|Hunter Green|64 106 58
+3347|Yellow Green MD|113 147 78
+3348|Yellow Green LT|204 217 177
+3350|Dusty Rose Ult DK|188 67 101
+3354|Dusty Rose LT|228 166 172
+3362|Pine Green DK|94 107 71
+3363|Pine Green MD|114 130 86
+3364|Pine Green|131 151 95
+3371|Black Brown|30 17 8
+3607|Plum LT|197 73 137
+3608|Plum VY LT|234 156 196
+3609|Plum Ult LT|244 174 213
+3685|Mauve VY DK|136 21 49
+3687|Mauve|201 107 112
+3688|Mauve MD|231 169 172
+3689|Mauve LT|251 191 194
+3705|Melon DK|255 121 146
+3706|Melon MD|255 173 188
+3708|Melon LT|255 203 213
+3712|Salmon MD|241 135 135
+3713|Salmon VY LT|255 226 226
+3716|Dusty Rose VY LT|255 189 189
+3721|Shell Pink DK|161 75 81
+3722|Shell Pink MD|188 108 100
+3726|Antique Mauve DK|155 91 102
+3727|Antique Mauve LT|219 169 178
+3731|Dusty Rose VY DK|218 103 131
+3733|Dusty Rose|232 135 155
+3743|Antique Violet VY LT|215 203 211
+3746|Blue Violet DK|119 107 152
+3747|Blue Violet VY LT|211 215 237
+3750|Antique Blue VY DK|56 76 94
+3752|Antique Blue VY LT|199 209 219
+3753|Antique Blue Ult VY LT|219 226 233
+3755|Baby Blue|147 180 206
+3756|Baby Blue Ult VY LT|238 252 252
+3760|Wedgewood MD|62 133 162
+3761|Sky Blue LT|172 216 226
+3765|Peacock Blue VY DK|52 127 140
+3766|Peacock Blue LT|153 207 217
+3768|Gray Green DK|101 127 127
+3770|Tawny VY LT|255 238 227
+3772|Desert Sand VY DK|160 108 80
+3773|Desert Sand MD|182 117 82
+3774|Desert Sand VY LT|243 225 215
+3776|Mahogany LT|207 121 57
+3777|Terra Cotta VY DK|134 48 34
+3778|Terra Cotta LT|217 137 120
+3779|Rosewood Ult VY LT|248 202 200
+3781|Mocha Brown DK|107 87 67
+3782|Mocha Brown LT|148 123 103
+3787|Brown Gray DK|98 93 80
+3790|Beige Gray Ult DK|127 106 85
+3799|Pewter Gray VY DK|66 66 66
+3801|Melon VY DK|231 73 103
+3802|Antique Mauve VY DK|113 65 73
+3803|Mauve DK|171 51 87
+3804|Cyclamen Pink DK|224 40 118
+3805|Cyclamen Pink|243 71 139
+3806|Cyclamen Pink LT|255 140 174
+3807|Cornflower Blue|96 103 140
+3808|Turquoise Ult VY DK|54 105 112
+3809|Turquoise VY DK|63 124 133
+3810|Turquoise DK|72 142 154
+3811|Turquoise VY LT|188 227 230
+3812|Sea Green VY DK|47 140 132
+3813|Blue Green LT|178 212 189
+3814|Aquamarine|80 139 125
+3815|Celadon Green DK|71 119 89
+3816|Celadon Green|101 165 125
+3817|Celadon Green LT|153 195 170
+3818|Emerald Green Ult VY DK|17 90 59
+3819|Moss Green LT|224 232 104
+3820|Straw DK|223 182 95
+3821|Straw|243 206 117
+3822|Straw LT|246 220 152
+3823|Yellow Ultra Pale|255 253 227
+3824|Apricot LT|254 205 194
+3825|Pumpkin Pale|253 189 150
+3826|Golden Brown|173 114 57
+3827|Golden Brown Pale|247 187 119
+3828|Hazelnut Brown|183 139 97
+3829|Old Gold VY DK|169 130 4
+3830|Terra Cotta|185 85 68
+3831|Raspberry DK|179 47 72
+3832|Raspberry MD|219 85 110
+3833|Raspberry LT|234 134 153
+3834|Grape DK|114 55 93
+3835|Grape MD|148 96 131
+3836|Grape LT|186 145 170
+3837|Lavender Ultra DK|108 58 110
+3838|Lavender Blue DK|92 114 148
+3839|Lavender Blue MD|123 142 171
+3840|Lavender Blue LT|176 192 218
+3841|Baby Blue Pale|205 223 237
+3842|Wedgewood VY DK|50 102 124
+3843|Electric Blue|20 170 208
+3844|Turquoise Bright DK|18 174 186
+3845|Turquoise Bright MD|4 196 202
+3846|Turquoise Bright LT|6 227 230
+3847|Teal Green DK|52 125 117
+3848|Teal Green MD|85 147 146
+3849|Teal Green LT|82 179 164
+3850|Emerald Green Bright DK|55 132 119
+3851|Emerald Green Bright LT|73 179 161
+3852|Straw VY DK|205 157 55
+3853|Autumn Gold DK|242 151 70
+3854|Autumn Gold MD|242 175 104
+3855|Autumn Gold LT|250 211 150
+3856|Mahogany Ult VY LT|255 211 181
+3857|Rosewood DK|104 37 26
+3858|Rosewood MD|150 74 63
+3859|Rosewood LT|186 139 124
+3860|Cocoa|125 93 87
+3861|Cocoa LT|166 136 129
+3862|Mocha Beige DK|138 110 78
+3863|Mocha Beige MD|164 131 92
+3864|Mocha Beige LT|203 182 156
+3865|Winter White|255 255 255
+3866|Mocha Brown Ult VY LT|250 246 240`;
+const KEY='pontocruz.projeto.v1', KEY_TEMA='pontocruz.tema';
+const SYMS=['●','■','▲','◆','★','♥','✚','✖','○','□','△','◇','☆','♦','♣','♠','A','B','C','D','E','F','G','H','K','M','N','P','R','S','T','U','V','W','X','Y','Z','2','3','4','5','6','7','8','9'];
+const $=s=>document.querySelector(s);
+const fmt=(n,d=0)=>Number(n).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+function parseNum(s){s=String(s).trim().replace(',','.');if(s===''||!/^-?\d*\.?\d+$|^-?\d+\.?$/.test(s))return NaN;return parseFloat(s)}
+function setVal(id,v){const el=$('#'+id);if(document.activeElement===el)return;el.value=(typeof v==='number'?String(Math.round(v*100)/100):String(v)).replace('.',',')}
+// Campo numérico: aceita apagar e digitar livre; só aplica valores válidos; ao sair do campo, corrige para o limite.
+function bindNum(id,o,set,sync){const el=$('#'+id);
+  el.addEventListener('input',()=>{let v=parseNum(el.value);if(isNaN(v))return;if(o.int)v=Math.round(v);if(v<o.min||v>o.max)return;set(v)});
+  el.addEventListener('blur',()=>{let v=parseNum(el.value);if(!isNaN(v)){if(o.int)v=Math.round(v);v=Math.max(o.min,Math.min(o.max,v));set(v)}if(sync)sync()});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter')el.blur()})}
+
+
+/* ---------- cor ---------- */
+function lin(c){c/=255;return c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4)}
+function rgb2lab(r,g,b){r=lin(r);g=lin(g);b=lin(b);
+  let x=(0.4124*r+0.3576*g+0.1805*b)/0.95047,y=0.2126*r+0.7152*g+0.0722*b,z=(0.0193*r+0.1192*g+0.9505*b)/1.08883;
+  const f=t=>t>0.008856?Math.cbrt(t):7.787*t+16/116;x=f(x);y=f(y);z=f(z);
+  return [116*y-16,500*(x-y),200*(y-z)]}
+const dE=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+const hex2=n=>n.toString(16).padStart(2,'0');
+const toHex=(r,g,b)=>'#'+hex2(r)+hex2(g)+hex2(b);
+function hexRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+const DMC=DMC_RAW.trim().split('\n').map(l=>{const[code,name,rgb]=l.split('|');const[r,g,b]=rgb.trim().split(/\s+/).map(Number);return{code,name,r,g,b,hex:toHex(r,g,b),lab:rgb2lab(r,g,b)}});
+const DMC_BY={};DMC.forEach(d=>DMC_BY[d.code.toUpperCase()]=d);
+// Hama Midi (5 mm). RGB aproximado a partir de fotos das contas — confira na cartela.
+const HAMA_RAW=`01|Branco|236 237 237
+02|Creme|240 232 185
+03|Amarelo|240 185 1
+04|Laranja|230 79 39
+05|Vermelho|182 49 54
+06|Rosa|225 136 159
+07|Roxo|105 74 130
+08|Azul|44 70 144
+09|Azul claro|48 92 176
+10|Verde|37 104 71
+11|Verde claro|73 174 137
+12|Marrom|83 65 55
+17|Cinza|131 136 138
+18|Preto|46 47 49
+20|Marrom avermelhado|127 51 42
+21|Marrom claro|165 105 63
+22|Vermelho escuro|160 33 48
+26|Pele|222 155 144
+27|Bege|222 180 139
+28|Verde escuro|54 63 56
+29|Bordô claro|185 57 94
+30|Vinho|104 33 53
+31|Turquesa|103 151 174
+43|Amarelo pastel|242 241 127
+44|Vermelho pastel|239 122 121
+45|Lilás pastel|140 121 195
+46|Azul pastel|111 179 227
+47|Verde pastel|144 220 154
+48|Rosa pastel|229 141 203
+49|Azul celeste|76 166 201
+60|Marrom urso|192 143 68
+70|Cinza claro|157 160 162
+71|Cinza escuro|85 90 93
+82|Ameixa|139 44 100
+83|Petróleo|19 120 141
+84|Verde oliva|104 117 55`;
+const HAMA=HAMA_RAW.split('\n').map(l=>{const[code,name,rgb]=l.split('|');const[r,g,b]=rgb.trim().split(/\s+/).map(Number);return{code,name,r,g,b,hex:toHex(r,g,b),lab:rgb2lab(r,g,b)}});
+const HAMA_BY={};HAMA.forEach(d=>HAMA_BY[d.code]=d);
+const MATS={
+  dmc:{nome:'Ponto cruz (DMC)',lista:DMC,by:DMC_BY,pref:'DMC',un:'pontos',Un:'Pontos',un1:'ponto',cores:'Linhas DMC permitidas',todas:'Todas as cores DMC do catálogo',ex:'Ex.: B5200 747 518 762 414 3799 721 666 3777 3346 699 727',
+    norm:s=>{s=s.toUpperCase();if(s==='BLANC'||s==='BRANCO')s='WHITE';return DMC_BY[s]?DMC_BY[s].code:null}},
+  hama:{nome:'Hama Beads (Midi 5 mm)',lista:HAMA,by:HAMA_BY,pref:'Hama',un:'contas',Un:'Contas',un1:'conta',cores:'Cores Hama permitidas',todas:'Todas as cores Hama Midi da lista',ex:'Ex.: 01 03 04 05 10 11 18 21',
+    norm:s=>{s=s.toUpperCase().replace(/^H/,'');if(/^\d$/.test(s))s='0'+s;return HAMA_BY[s]?s:null}}};
+const MAT=()=>MATS[(typeof P!=='undefined'&&P&&P.material)||'dmc'];
+const dmc=c=>{const m=MAT();return m.by[m.norm(String(c))]};
+function normCod(s){return MAT().norm(String(s).trim())}
+const lumi=d=>0.299*d.r+0.587*d.g+0.114*d.b;
+
+/* ---------- estado ---------- */
+function novoProjeto(w=31,h=31){return{schema:1,nome:'Sem título',material:'dmc',w,h,cells:new Array(w*h).fill(-1),cores:[],
+  conv:{w:31,h:31,lock:true,amostra:'media',maxCores:12,paleta:'todas',codigos:'',fundo:false,fundoCor:'#ffffff',fundoTol:12,limpar:false},
+  crop:null,fonte:null,
+  grade:{passo:2.5,furo:1.3,esp:2,parede:1.6,folga:0.3,borda:2,aparar:true,fios:3,mesa:180},hama:{placa:29},codigosMat:{dmc:'',hama:''},
+  view:{zoom:16,simbolos:true,cores:true}}}
+function normalizar(o){const b=novoProjeto();if(!o||typeof o!=='object')return b;
+  const p=Object.assign(b,o);if(!MATS[p.material])p.material='dmc';p.hama=Object.assign({placa:29},o.hama||{});p.codigosMat=Object.assign({dmc:'',hama:''},o.codigosMat||{});p.conv=Object.assign(novoProjeto().conv,o.conv||{});p.grade=Object.assign(novoProjeto().grade,o.grade||{});p.view=Object.assign(novoProjeto().view,o.view||{});
+  p.w=Math.max(2,Math.min(300,p.w|0));p.h=Math.max(2,Math.min(300,p.h|0));
+  const nm=MATS[p.material].norm;p.cores=(Array.isArray(p.cores)?p.cores:[]).filter(c=>c&&nm(String(c.code))).map(c=>({code:nm(String(c.code)),sym:c.sym||'?'}));
+  if(!Array.isArray(p.cells)||p.cells.length!==p.w*p.h)p.cells=new Array(p.w*p.h).fill(-1);
+  p.cells=p.cells.map(v=>(Number.isInteger(v)&&v>=0&&v<p.cores.length)?v:-1);if(!Array.isArray(p.feito)||p.feito.length!==p.w*p.h)p.feito=null;else p.feito=p.feito.map(v=>v?1:0);
+  return p}
+let P=novoProjeto();
+let IMG=null; // imagem de origem carregada
+let undo=[],redo=[];
+let tool='lapis',ativo=0;
+
+/* ---------- persistência ---------- */
+let saveT=null;
+function setStatus(t,pend){$('#status span').textContent=t;$('#status').classList.toggle('pend',!!pend)}
+function salvar(){setStatus('Não salvo',true);clearTimeout(saveT);saveT=setTimeout(()=>{
+  try{localStorage.setItem(KEY,JSON.stringify(P));setStatus('Salvo localmente')}
+  catch(e){try{localStorage.setItem(KEY,JSON.stringify(Object.assign({},P,{fonte:null})));setStatus('Salvo (imagem grande demais p/ guardar)')}catch(e2){setStatus('Sem salvamento local — use Salvar .json',true)}}},500)}
+function carregar(){try{const s=localStorage.getItem(KEY);if(s)P=normalizar(JSON.parse(s))}catch(e){P=novoProjeto()}}
+let DL=null;const EMBUTIDO=!!(window.claude&&typeof window.claude.use==='function');
+if(EMBUTIDO){try{window.claude.use('downloads').then(d=>{DL=d}).catch(()=>{})}catch(e){}}
+async function baixar(blob,nome){if(EMBUTIDO){if(!DL){setStatus('Downloads indisponíveis nesta visualização',true);return}
+    try{await DL.save({filename:nome,data:blob});setStatus('Arquivo salvo')}catch(e){setStatus(e&&e.code==='declined'?'Download cancelado':'Não foi possível baixar aqui',true)}return}
+  const ios=/iP(ad|hone|od)/.test(navigator.platform)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(ios&&navigator.canShare){try{const f=new File([blob],nome,{type:blob.type||'application/octet-stream'});if(navigator.canShare({files:[f]})){await navigator.share({files:[f]});setStatus('Arquivo pronto');return}}catch(e){if(e&&e.name==='AbortError')return}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+const slug=()=>(P.nome||'ponto-cruz').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'ponto-cruz';
+
+/* ---------- modal ---------- */
+function confirmar(msg,ok='Confirmar'){return new Promise(res=>{$('#mMsg').textContent=msg;$('#mSim').textContent=ok;$('#modal').classList.add('on');
+  const fim=v=>{$('#modal').classList.remove('on');$('#mSim').onclick=$('#mNo').onclick=null;res(v)};$('#mSim').onclick=()=>fim(true);$('#mNo').onclick=()=>fim(false)})}
+
+/* ---------- abas ---------- */
+let abaAtual='importar';
+function abrirAba(a){abaAtual=a;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.aba===a));
+  document.querySelectorAll('.aba').forEach(s=>s.classList.toggle('on',s.id==='aba-'+a));
+  if(a==='editor'){desenharEditor();renderLegenda()}
+  if(a==='grade'){renderGrade()}
+  if(a==='grafico'){desenharGrafico()}
+  if(a==='importar'){desenharCrop()}}
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b){if(document.body.classList.contains('foco'))setFoco(false);abrirAba(b.dataset.aba)}});
+
+/* ---------- contagens e linha ---------- */
+function contagem(){const c=new Array(P.cores.length).fill(0);for(const v of P.cells)if(v>=0)c[v]++;return c}
+function mmPorPonto(){const g=P.grade,p=+g.passo||4,t=+g.esp||1.6;return(2*Math.SQRT2*p+2*p+4*t)*(+g.fios||1)*1.15}
+const MEADA_MM=8000*6; // 8 m × 6 fios
+function linhaInfo(n){const mm=n*mmPorPonto();return{m:mm/1000,meadas:mm/MEADA_MM}}
+function bboxDesenho(){let x0=1e9,y0=1e9,x1=-1,y1=-1;for(let j=0;j<P.h;j++)for(let i=0;i<P.w;i++)if(P.cells[i+j*P.w]>=0){x0=Math.min(x0,i);y0=Math.min(y0,j);x1=Math.max(x1,i);y1=Math.max(y1,j)}return x1<0?null:{x0,y0,x1,y1}}
+function renderStats(){const c=contagem(),tot=c.reduce((a,b)=>a+b,0);const usadas=c.filter(v=>v>0).length;const fe=FE();let nf=0;P.cells.forEach((v,k)=>{if(v>=0&&fe[k])nf++});
+  let mea=0;c.forEach(n=>{if(n>0)mea+=Math.max(1,Math.ceil(linhaInfo(n).meadas))});
+  const t=tamanhoPeca(),H=P.material==='hama';const pl=placasHama();
+  $('#stats').innerHTML=[['Grade',`${P.w} × ${P.h}`],[MAT().Un,fmt(tot)],['Cores',usadas],H?['Placas',`${pl.n} (${pl.cx} × ${pl.cy}) de ${P.hama.placa}×${P.hama.placa}`]:['Linha',tot?`≈ ${fmt(linhaInfo(tot).m,1)} m · ${mea} meada${mea>1?'s':''}`:'—'],['Peça',`${fmt(t.w,1)} × ${fmt(t.h,1)} mm`]]
+    .concat(nf?[['Feito',`${fmt(nf)} · ${fmt(100*nf/tot,0)}%`]]:[]).map(([k,v])=>`<div class="stat"><small>${k}</small><b class="mono">${v}</b></div>`).join('')}
+function tudoMudou(){renderStats();salvar()}
+
+/* ---------- undo ---------- */
+function FE(){if(!Array.isArray(P.feito)||P.feito.length!==P.w*P.h)P.feito=new Array(P.w*P.h).fill(0);return P.feito}
+const snap=()=>({material:P.material,w:P.w,h:P.h,cells:P.cells.slice(),cores:P.cores.map(c=>({...c})),feito:FE().slice()});
+function pushUndo(){undo.push(snap());if(undo.length>60)undo.shift();redo=[]}
+function restaurar(s){if(s.material&&s.material!==P.material){P.material=s.material;syncMaterialUI();syncConvUI()}P.w=s.w;P.h=s.h;P.cells=s.cells;P.cores=s.cores;P.feito=s.feito||null;if(ativo>=P.cores.length)ativo=P.cores.length?0:-1;desenharEditor();renderLegenda();tudoMudou()}
+$('#bUndo').onclick=()=>{if(!undo.length)return;redo.push(snap());restaurar(undo.pop())};
+$('#bRedo').onclick=()=>{if(!redo.length)return;undo.push(snap());restaurar(redo.pop())};
+document.addEventListener('keydown',e=>{if(e.target.matches('input,textarea,select'))return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();(e.shiftKey?$('#bRedo'):$('#bUndo')).click()}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();$('#bRedo').click()}});
+
+/* ---------- importar ---------- */
+const C=()=>P.conv;
+function carregarImagem(src,cb){const im=new Image();im.onload=()=>{IMG=im;cb&&cb()};im.onerror=()=>{IMG=null;setStatus('Não consegui abrir a imagem',true)};im.src=src}
+function arquivoImagem(file){if(!file||!file.type.startsWith('image/'))return;const fr=new FileReader();fr.onload=()=>{
+  const im=new Image();im.onload=()=>{const max=1800,s=Math.min(1,max/Math.max(im.width,im.height));const cv=document.createElement('canvas');cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);
+    const x=cv.getContext('2d');x.drawImage(im,0,0,cv.width,cv.height);P.fonte=cv.toDataURL(file.type==='image/jpeg'?'image/jpeg':'image/png',0.92);
+    if(P.fonte.length>3.5e6)P.fonte=cv.toDataURL('image/jpeg',0.9);
+    FONTES.length=0;$('#bDescortar').disabled=true;carregarImagem(P.fonte,()=>{P.crop={x:0,y:0,w:IMG.width,h:IMG.height};const x2=IMG; // cor do fundo = canto
+      const t=document.createElement('canvas');t.width=t.height=1;const tx=t.getContext('2d');tx.drawImage(x2,0,0,1,1,0,0,1,1);const d=tx.getImageData(0,0,1,1).data;C().fundoCor=toHex(d[0],d[1],d[2]);
+      if(C().lock)ajustarAltura();syncConvUI();mostrarCrop();agendarPrev();salvar()})};im.src=fr.result};fr.readAsDataURL(file)}
+$('#drop').onclick=()=>$('#fImg').click();$('#bTrocarImg').onclick=()=>$('#fImg').click();
+$('#fImg').onchange=e=>{arquivoImagem(e.target.files[0]);e.target.value=''};
+['dragover','dragenter'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();$('#drop').classList.add('over')}));
+['dragleave','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();$('#drop').classList.remove('over')}));
+document.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files[0];if(f){abrirAba('importar');arquivoImagem(f)}});
+function mostrarCrop(){const tem=!!IMG;$('#drop').hidden=tem;$('#cropArea').hidden=!tem;$('#bTrocarImg').hidden=!tem;$('#bAplicar').disabled=!tem;desenharCrop()}
+function ajustarAltura(){if(!P.crop)return;C().h=Math.max(2,Math.min(300,Math.round(C().w*P.crop.h/P.crop.w)))}
+let pickFundo=false;
+function desenharCrop(){if(!IMG||abaAtual!=='importar')return;const cv=$('#cropCv'),wrap=cv.parentElement;const W=wrap.clientWidth||600;const s=W/IMG.width;const dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(W*dpr);cv.height=Math.round(IMG.height*s*dpr);cv.style.height=(IMG.height*s)+'px';const x=cv.getContext('2d');x.setTransform(dpr*s,0,0,dpr*s,0,0);x.imageSmoothingQuality='high';x.drawImage(IMG,0,0);
+  const c=P.crop;if(!c)return;x.fillStyle='rgba(0,0,0,.5)';x.beginPath();x.rect(0,0,IMG.width,IMG.height);x.rect(c.x,c.y+c.h,c.w,-c.h);x.fill('evenodd');
+  const cw=c.w/C().w,ch=c.h/C().h;x.lineWidth=1/s;
+  if(cw*s>=3&&ch*s>=3){x.strokeStyle='rgba(232,135,91,.55)';x.beginPath();for(let i=1;i<C().w;i++){x.moveTo(c.x+i*cw,c.y);x.lineTo(c.x+i*cw,c.y+c.h)}for(let j=1;j<C().h;j++){x.moveTo(c.x,c.y+j*ch);x.lineTo(c.x+c.w,c.y+j*ch)}x.stroke()}
+  x.strokeStyle='#e8875b';x.lineWidth=2/s;x.strokeRect(c.x,c.y,c.w,c.h);
+  ['cX','cY','cW','cH'].forEach((id,k)=>{const el=$('#'+id);if(document.activeElement!==el)el.value=Math.round([c.x,c.y,c.w,c.h][k])})}
+(function(){const cv=$('#cropCv');let st=null;
+  const pt=e=>{const r=cv.getBoundingClientRect();return{x:Math.max(0,Math.min(IMG.width,(e.clientX-r.left)*IMG.width/r.width)),y:Math.max(0,Math.min(IMG.height,(e.clientY-r.top)*IMG.height/r.height))}};
+  cv.addEventListener('pointerdown',e=>{if(!IMG)return;e.preventDefault();const p=pt(e);
+    if(pickFundo){const t=document.createElement('canvas');t.width=t.height=1;const tx=t.getContext('2d');tx.drawImage(IMG,Math.floor(p.x),Math.floor(p.y),1,1,0,0,1,1);const d=tx.getImageData(0,0,1,1).data;C().fundoCor=toHex(d[0],d[1],d[2]);C().fundo=true;pickFundo=false;$('#bPickFundo').classList.remove('on');syncConvUI();agendarPrev();salvar();return}
+    cv.setPointerCapture(e.pointerId);st=p});
+  cv.addEventListener('pointermove',e=>{if(!st)return;const p=pt(e);const w=Math.abs(p.x-st.x),h=Math.abs(p.y-st.y);if(w<4||h<4)return;P.crop={x:Math.min(p.x,st.x),y:Math.min(p.y,st.y),w,h};if(C().lock){ajustarAltura();syncConvUI()}desenharCrop();agendarPrev()});
+  const fim=()=>{if(st){st=null;salvar()}};cv.addEventListener('pointerup',fim);cv.addEventListener('pointercancel',fim)})();
+['cX','cY','cW','cH'].forEach(id=>{$('#'+id).addEventListener('blur',()=>setTimeout(desenharCrop,0));$('#'+id).addEventListener('keydown',e=>{if(e.key==='Enter')e.target.blur()})});
+['cX','cY','cW','cH'].forEach(id=>$('#'+id).addEventListener('input',()=>{if(!IMG||!P.crop)return;let x=parseNum($('#cX').value),y=parseNum($('#cY').value),w=parseNum($('#cW').value),h=parseNum($('#cH').value);if([x,y,w,h].some(isNaN)||w<4||h<4)return;
+  x=Math.max(0,Math.min(IMG.width-4,x));y=Math.max(0,Math.min(IMG.height-4,y));w=Math.min(w,IMG.width-x);h=Math.min(h,IMG.height-y);P.crop={x,y,w,h};if(C().lock){ajustarAltura();syncConvUI()}desenharCrop();agendarPrev();salvar()}));
+const FONTES=[];
+$('#bCortar').onclick=()=>{if(!IMG||!P.crop)return;const c=P.crop;if(c.x<=0.5&&c.y<=0.5&&c.w>=IMG.width-1&&c.h>=IMG.height-1){setStatus('Arraste sobre a imagem para escolher a área antes de cortar',true);return}
+  const cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(c.w));cv.height=Math.max(1,Math.round(c.h));cv.getContext('2d').drawImage(IMG,c.x,c.y,c.w,c.h,0,0,cv.width,cv.height);
+  FONTES.push(P.fonte);if(FONTES.length>10)FONTES.shift();P.fonte=cv.width*cv.height>1.2e6?cv.toDataURL('image/jpeg',0.92):cv.toDataURL('image/png');
+  carregarImagem(P.fonte,()=>{P.crop={x:0,y:0,w:IMG.width,h:IMG.height};if(C().lock)ajustarAltura();$('#bDescortar').disabled=false;syncConvUI();desenharCrop();agendarPrev();salvar();setStatus('Imagem cortada')})};
+$('#bDescortar').onclick=()=>{if(!FONTES.length)return;P.fonte=FONTES.pop();carregarImagem(P.fonte,()=>{P.crop={x:0,y:0,w:IMG.width,h:IMG.height};if(C().lock)ajustarAltura();$('#bDescortar').disabled=!FONTES.length;syncConvUI();desenharCrop();agendarPrev();salvar()})};
+$('#bCropAll').onclick=()=>{if(!IMG)return;P.crop={x:0,y:0,w:IMG.width,h:IMG.height};if(C().lock)ajustarAltura();syncConvUI();desenharCrop();agendarPrev();salvar()};
+$('#bPickFundo').onclick=()=>{pickFundo=!pickFundo;$('#bPickFundo').classList.toggle('on',pickFundo)};
+
+function syncConvUI(){const c=C();setVal('vW',c.w);setVal('vH',c.h);$('#vLock').checked=c.lock;$('#vH').disabled=c.lock&&!!P.crop;$('#vAmostra').value=c.amostra;setVal('vMax',c.maxCores);$('#vPaleta').value=c.paleta;
+  $('#vCodigos').value=c.codigos;$('#listaBox').hidden=c.paleta!=='lista';$('#vFundo').checked=c.fundo;$('#fundoBox').style.display=c.fundo?'flex':'none';$('#vFundoCor').value=c.fundoCor;$('#vTol').value=c.fundoTol;$('#tolV').textContent=c.fundoTol;$('#vLimpar').checked=c.limpar}
+function lerConvUI(){const c=C();c.lock=$('#vLock').checked;if(c.lock&&P.crop)ajustarAltura();
+  c.amostra=$('#vAmostra').value;c.paleta=$('#vPaleta').value;c.codigos=$('#vCodigos').value;c.fundo=$('#vFundo').checked;c.fundoCor=$('#vFundoCor').value;c.fundoTol=+$('#vTol').value;c.limpar=$('#vLimpar').checked}
+['vLock','vAmostra','vPaleta','vCodigos','vFundo','vFundoCor','vTol','vLimpar'].forEach(id=>$('#'+id).addEventListener('input',()=>{lerConvUI();syncConvUI();desenharCrop();agendarPrev();salvar()}));
+
+const convMudou=()=>{syncConvUI();desenharCrop();agendarPrev();salvar()};
+bindNum('vW',{min:4,max:300,int:true},v=>{C().w=v;if(C().lock&&P.crop)ajustarAltura();convMudou()},syncConvUI);
+bindNum('vH',{min:4,max:300,int:true},v=>{C().h=v;convMudou()},syncConvUI);
+bindNum('vMax',{min:1,max:80,int:true},v=>{C().maxCores=v;convMudou()},syncConvUI);
+function paletaPermitida(){const c=C();if(c.paleta==='lista'){const cods=[...new Set(c.codigos.split(/[\s,;]+/).map(normCod).filter(Boolean))];if(cods.length)return{lista:cods.map(dmc),inval:c.codigos.split(/[\s,;]+/).filter(s=>s&&!normCod(s))}}return{lista:MAT().lista,inval:[]}}
+function converter(){if(!IMG||!P.crop)return null;const c=C(),W=c.w,H=c.h,cr=P.crop;
+  const k=Math.max(2,Math.min(8,Math.floor(2400/Math.max(W,H))));const cv=document.createElement('canvas');cv.width=W*k;cv.height=H*k;
+  const x=cv.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(IMG,cr.x,cr.y,cr.w,cr.h,0,0,W*k,H*k);
+  const d=x.getImageData(0,0,W*k,H*k).data;const a0=c.amostra==='centro'?Math.floor(k*0.3):0,a1=c.amostra==='centro'?Math.ceil(k*0.7):k;
+  const {lista,inval}=paletaPermitida();const cache=new Map();const fundoLab=rgb2lab(...hexRgb(c.fundoCor));
+  const near=(r,g,b)=>{const key=(r>>2)<<12|(g>>2)<<6|(b>>2);let v=cache.get(key);if(v!==undefined)return v;const L=rgb2lab(r,g,b);let best=0,bd=1e9;for(let i=0;i<lista.length;i++){const dd=dE(L,lista[i].lab);if(dd<bd){bd=dd;best=i}}cache.set(key,best);return best};
+  const out=new Int16Array(W*H).fill(-1);
+  for(let j=0;j<H;j++)for(let i=0;i<W;i++){let r=0,g=0,b=0,a=0,n=0;
+    for(let yy=a0;yy<a1;yy++)for(let xx=a0;xx<a1;xx++){const o=((j*k+yy)*W*k+(i*k+xx))*4;const al=d[o+3]/255;r+=d[o]*al;g+=d[o+1]*al;b+=d[o+2]*al;a+=al;n++}
+    if(a/n<0.5)continue;r=Math.round(r/a);g=Math.round(g/a);b=Math.round(b/a);
+    if(c.fundo&&dE(rgb2lab(r,g,b),fundoLab)<c.fundoTol)continue;out[i+j*W]=near(r,g,b)}
+  // redução de cores: junta o par de menor custo (pontos × distância)
+  const cnt=new Map();for(const v of out)if(v>=0)cnt.set(v,(cnt.get(v)||0)+1);
+  const remap=new Map();[...cnt.keys()].forEach(kk=>remap.set(kk,kk));
+  while(cnt.size>c.maxCores){const ks=[...cnt.keys()];let best=null,bc=Infinity;
+    for(let a=0;a<ks.length;a++)for(let b=a+1;b<ks.length;b++){const ca=cnt.get(ks[a]),cb=cnt.get(ks[b]);const cost=Math.min(ca,cb)*dE(lista[ks[a]].lab,lista[ks[b]].lab);if(cost<bc){bc=cost;best=ca<cb?[ks[a],ks[b]]:[ks[b],ks[a]]}}
+    const[de,para]=best;cnt.set(para,cnt.get(para)+cnt.get(de));cnt.delete(de);for(const[kk,v]of remap)if(v===de)remap.set(kk,para)}
+  for(let i=0;i<out.length;i++)if(out[i]>=0)out[i]=remap.get(out[i]);
+  if(c.limpar){const cp=out.slice();for(let j=0;j<H;j++)for(let i=0;i<W;i++){const v=cp[i+j*W];if(v<0)continue;const viz=new Map();let igual=false;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const xx=i+dx,yy=j+dy;const u=(xx<0||yy<0||xx>=W||yy>=H)?-1:cp[xx+yy*W];if(u===v){igual=true;break}viz.set(u,(viz.get(u)||0)+1)}
+    if(!igual){let m=-1,mc=-1;for(const[u,q]of viz)if(q>mc){mc=q;m=u}out[i+j*W]=m}}}
+  const codes=Array.from(out,v=>v>=0?lista[v].code:null);return{W,H,codes,inval}}
+let prevT=null,ultimo=null;
+function agendarPrev(){clearTimeout(prevT);prevT=setTimeout(()=>{ultimo=converter();desenharPrev()},120)}
+function desenharPrev(){const cv=$('#prevCv');if(!ultimo){cv.width=cv.height=10;$('#prevInfo').textContent='Suba uma imagem para ver a prévia.';return}
+  const{W,H,codes,inval}=ultimo;const cs=Math.max(2,Math.floor(Math.min(420/W,420/H)));cv.width=W*cs;cv.height=H*cs;const x=cv.getContext('2d');x.fillStyle='#fbf9f3';x.fillRect(0,0,cv.width,cv.height);
+  const cont={};codes.forEach((cd,i)=>{if(!cd)return;cont[cd]=(cont[cd]||0)+1;x.fillStyle=dmc(cd).hex;x.fillRect((i%W)*cs,Math.floor(i/W)*cs,cs,cs)});
+  const n=Object.keys(cont).length,tot=Object.values(cont).reduce((a,b)=>a+b,0);
+  $('#prevInfo').innerHTML=`${W} × ${H} · ${fmt(tot)} ${MAT().un} · ${n} cor${n!==1?'es':''}: `+Object.entries(cont).sort((a,b)=>b[1]-a[1]).map(([cd])=>`<b>${cd}</b>`).join(', ')+(inval.length?`<br><span style="color:var(--err)">Fora do catálogo: ${inval.join(', ')}</span>`:'')}
+$('#bAplicar').onclick=async()=>{if(!ultimo)ultimo=converter();if(!ultimo)return;
+  if(P.cells.some(v=>v>=0)&&!(await confirmar('Substituir o gráfico atual pelo resultado da imagem? (dá para desfazer no Editor)','Substituir')))return;
+  pushUndo();const{W,H,codes}=ultimo;const cont={};codes.forEach(cd=>{if(cd)cont[cd]=(cont[cd]||0)+1});
+  const ord=Object.keys(cont).sort((a,b)=>cont[b]-cont[a]);P.cores=ord.map((cd,i)=>({code:cd,sym:SYMS[i%SYMS.length]}));const idx={};ord.forEach((cd,i)=>idx[cd]=i);
+  P.w=W;P.h=H;P.cells=Array.from(codes,cd=>cd?idx[cd]:-1);P.feito=null;ativo=0;
+  P.view.zoom=Math.max(6,Math.min(28,Math.floor(900/Math.max(W,H))));tudoMudou();abrirAba('editor')};
+$('#bBranco').onclick=async()=>{lerConvUI();if(P.cells.some(v=>v>=0)&&!(await confirmar('Criar uma grade em branco no lugar do gráfico atual?','Criar')))return;pushUndo();
+  const W=C().w,H=C().lock&&P.crop?C().h:C().h;P.w=W;P.h=H;P.cells=new Array(W*H).fill(-1);P.feito=null;
+  if(!P.cores.length)P.cores=[{code:'310',sym:SYMS[0]}];ativo=0;tudoMudou();abrirAba('editor')};
+
+/* ---------- editor ---------- */
+const edCv=$('#edCv');
+const capturar=e=>{try{edCv.setPointerCapture(e.pointerId)}catch(_){}};
+function corDe(v){return v>=0?dmc(P.cores[v].code):null}
+function desenharCelulas(x,cs,ox,oy,opt){const{cores,simbolos,extras}=opt;const fe=extras?FE():null,dest=extras&&P.view.destaque&&ativo>=-1;x.font=`700 ${Math.floor(cs*0.62)}px system-ui,sans-serif`;x.textAlign='center';x.textBaseline='middle';
+  for(let j=0;j<P.h;j++)for(let i=0;i<P.w;i++){const v=P.cells[i+j*P.w];if(v<0)continue;const d=corDe(v);const px=ox+i*cs,py=oy+j*cs;
+    if(cores){x.fillStyle=d.hex;if(P.material==='hama'){x.beginPath();x.arc(px+cs/2,py+cs/2,cs*0.47,0,7);if(!(simbolos&&cs>=10))x.arc(px+cs/2,py+cs/2,cs*0.17,0,7,true);x.fill('evenodd')}else x.fillRect(px,py,cs,cs)}
+    if(simbolos&&cs>=10){x.fillStyle=cores?(lumi(d)>140?'#1a1a1a':'#ffffff'):'#1a1a1a';x.fillText(P.cores[v].sym,px+cs/2,py+cs/2+1)}
+    if(dest&&v!==ativo){x.fillStyle='rgba(251,249,243,.82)';x.fillRect(px,py,cs,cs)}
+    if(fe&&fe[i+j*P.w]){x.fillStyle='rgba(251,249,243,.62)';x.fillRect(px,py,cs,cs);if(cs>=8){x.strokeStyle='#2f9e63';x.lineWidth=Math.max(1.5,cs*0.12);x.beginPath();x.moveTo(px+cs*0.22,py+cs*0.55);x.lineTo(px+cs*0.43,py+cs*0.75);x.lineTo(px+cs*0.8,py+cs*0.28);x.stroke()}}}}
+function desenharLinhas(x,cs,ox,oy){for(let i=0;i<=P.w;i++){const f=i%10===0;x.strokeStyle=f?'rgba(0,0,0,.6)':'rgba(0,0,0,.16)';x.lineWidth=f?1.4:1;x.beginPath();x.moveTo(ox+i*cs+.5,oy);x.lineTo(ox+i*cs+.5,oy+P.h*cs);x.stroke()}
+  for(let j=0;j<=P.h;j++){const f=j%10===0;x.strokeStyle=f?'rgba(0,0,0,.6)':'rgba(0,0,0,.16)';x.lineWidth=f?1.4:1;x.beginPath();x.moveTo(ox,oy+j*cs+.5);x.lineTo(ox+P.w*cs,oy+j*cs+.5);x.stroke()}
+  if(P.material==='hama'){const n=P.hama.placa;x.strokeStyle='rgba(79,179,169,.95)';x.lineWidth=2.5;x.beginPath();for(let i=n;i<P.w;i+=n){x.moveTo(ox+i*cs+.5,oy);x.lineTo(ox+i*cs+.5,oy+P.h*cs)}for(let j=n;j<P.h;j+=n){x.moveTo(ox,oy+j*cs+.5);x.lineTo(ox+P.w*cs,oy+j*cs+.5)}x.stroke()}
+  x.strokeStyle='rgba(232,135,91,.85)';x.lineWidth=1.5;const cx=ox+P.w*cs/2,cy=oy+P.h*cs/2;x.setLineDash([4,4]);x.beginPath();x.moveTo(cx,oy);x.lineTo(cx,oy+P.h*cs);x.moveTo(ox,cy);x.lineTo(ox+P.w*cs,cy);x.stroke();x.setLineDash([])}
+function desenharEditor(){if(abaAtual!=='editor')return;const cs=P.view.zoom,dpr=window.devicePixelRatio||1;const W=P.w*cs+2,H=P.h*cs+2;
+  edCv.width=W*dpr;edCv.height=H*dpr;edCv.style.width=W+'px';edCv.style.height=H+'px';const x=edCv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+  x.fillStyle='#fbf9f3';x.fillRect(0,0,W,H);desenharCelulas(x,cs,1,1,{cores:P.view.cores,simbolos:P.view.simbolos,extras:true});desenharLinhas(x,cs,1,1);
+  $('#zoomV').textContent=cs+'px';$('#eSim').checked=P.view.simbolos;syncPen();$('#eDest').checked=!!P.view.destaque;$('#eCor').checked=P.view.cores;edCv.style.touchAction='none';edCv.style.cursor=tool==='mover'?'grab':'crosshair';
+  setVal('rW',P.w);setVal('rH',P.h)}
+let rafEd=0;const pedirEd=()=>{if(!rafEd)rafEd=requestAnimationFrame(()=>{rafEd=0;desenharEditor()})};
+function celula(e){const r=edCv.getBoundingClientRect();const cs=P.view.zoom;const i=Math.floor((e.clientX-r.left-1)/cs),j=Math.floor((e.clientY-r.top-1)/cs);return(i>=0&&j>=0&&i<P.w&&j<P.h)?{i,j}:null}
+let valorFeito=1;
+function pintar(c){const k=c.i+c.j*P.w;if(tool==='feito'){if(P.cells[k]>=0)FE()[k]=valorFeito;return}const v=tool==='borracha'?-1:ativo;if(tool==='lapis'&&ativo<0&&!P.cores.length)return;if(P.cells[k]!==v)FE()[k]=0;P.cells[k]=v}
+function balde(c,v){const W=P.w,H=P.h,alvo=P.cells[c.i+c.j*W];if(alvo===v)return;const st=[c.i+c.j*W];const fe=FE();while(st.length){const k=st.pop();if(P.cells[k]!==alvo)continue;P.cells[k]=v;fe[k]=0;const i=k%W,j=(k/W)|0;if(i>0)st.push(k-1);if(i<W-1)st.push(k+1);if(j>0)st.push(k-W);if(j<H-1)st.push(k+W)}}
+// Mover: arrasta a área do gráfico (mouse ou dedo)
+let PAN=null,PEN_DOWN=false,PINCH=null,ABORTAR=()=>{};const TOQUES=new Map();
+const ehDedo=e=>P.view.penOnly&&e.pointerType==='touch';
+(function(){const wrap=$('#edWrap');
+  const meio=()=>{const p=[...TOQUES.values()];return{x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1}};
+  edCv.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='pen'){PEN_DOWN=true;PAN=null;PINCH=null;if(!P.view.penOnly&&!P.view.penVisto){P.view.penOnly=true;P.view.penVisto=true;syncPen();salvar();setStatus('Apple Pencil detectada: o dedo agora só arrasta (botão no topo do editor)')}}
+    if(e.pointerType==='touch'){TOQUES.set(e.pointerId,{x:e.clientX,y:e.clientY});capturar(e);
+      if(TOQUES.size===2&&!PEN_DOWN){ABORTAR();PAN=null;const m=meio(),r=wrap.getBoundingClientRect();PINCH={d0:m.d,z0:P.view.zoom,cx:(wrap.scrollLeft+m.x-r.left)/P.view.zoom,cy:(wrap.scrollTop+m.y-r.top)/P.view.zoom};e.preventDefault();return}
+      if(TOQUES.size>2)return}
+    if(PINCH)return;
+    const dedoConta=tool==='conta'&&ehDedo(e);
+    if(!(tool==='mover'||ehDedo(e)))return;e.preventDefault();if(PEN_DOWN)return;capturar(e);
+    PAN={x:e.clientX,y:e.clientY,id:e.pointerId,t:performance.now(),sl:wrap.scrollLeft,st:wrap.scrollTop,wy:window.scrollY,moveu:false,conta:dedoConta};edCv.style.cursor='grabbing'});
+  edCv.addEventListener('pointermove',e=>{
+    if(TOQUES.has(e.pointerId))TOQUES.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(PINCH&&TOQUES.size>=2){const m=meio(),r=wrap.getBoundingClientRect();const nz=Math.max(4,Math.min(48,Math.round(PINCH.z0*m.d/PINCH.d0)));
+      if(nz!==P.view.zoom){P.view.zoom=nz;desenharEditor()}wrap.scrollLeft=PINCH.cx*P.view.zoom-(m.x-r.left);wrap.scrollTop=PINCH.cy*P.view.zoom-(m.y-r.top);return}
+    const pan=PAN;if(!pan||e.pointerId!==pan.id)return;const dx=e.clientX-pan.x,dy=e.clientY-pan.y;if(Math.abs(dx)+Math.abs(dy)>6)pan.moveu=true;wrap.scrollLeft=pan.sl-dx;
+    const maxT=wrap.scrollHeight-wrap.clientHeight;const alvo=pan.st-dy;wrap.scrollTop=alvo;
+    if(maxT<=0||alvo<0||alvo>maxT)window.scrollTo(0,pan.wy-(dy-(pan.st-wrap.scrollTop)))});
+  const fim=e=>{if(e.pointerType==='pen')PEN_DOWN=false;
+    if(TOQUES.delete(e.pointerId)&&PINCH&&TOQUES.size<2){PINCH=null;salvar();PAN=null;return}
+    if(PAN&&e.pointerId===PAN.id){const pan=PAN;PAN=null;edCv.style.cursor=tool==='mover'?'grab':'crosshair';
+      if(pan.conta&&!pan.moveu&&e.type==='pointerup'){const c=celula(e);if(c){ativo=P.cells[c.i+c.j*P.w];if(P.view.destaque)pedirEd();renderLegenda();info(c)}}}};
+  edCv.addEventListener('pointerup',fim);edCv.addEventListener('pointercancel',fim);
+  wrap.addEventListener('wheel',e=>{if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();const nz=Math.max(4,Math.min(48,P.view.zoom+(e.deltaY<0?2:-2)));if(nz===P.view.zoom)return;
+    const r=wrap.getBoundingClientRect(),fx=(wrap.scrollLeft+e.clientX-r.left)/P.view.zoom,fy=(wrap.scrollTop+e.clientY-r.top)/P.view.zoom;P.view.zoom=nz;desenharEditor();wrap.scrollLeft=fx*nz-(e.clientX-r.left);wrap.scrollTop=fy*nz-(e.clientY-r.top);salvar()},{passive:false})})();
+(function(){let des=false,ult=null,pid=null;
+  // segundo dedo encostou durante um traço feito com o dedo: vira pinça e o traço é desfeito
+  ABORTAR=()=>{if(!des)return;des=false;pid=null;if(undo.length){const s0=undo.pop();P.cells=s0.cells;P.cores=s0.cores;P.w=s0.w;P.h=s0.h}desenharEditor()};
+  edCv.addEventListener('pointerdown',e=>{if(tool==='mover'||ehDedo(e)||des||PINCH||(e.pointerType==='touch'&&TOQUES.size>1))return;const c=celula(e);if(!c)return;e.preventDefault();
+    if(tool==='conta'){ativo=P.cells[c.i+c.j*P.w];if(P.view.destaque)pedirEd();renderLegenda();info(c);return}
+    pushUndo();if(tool==='balde'){balde(c,ativo);desenharEditor();renderLegenda();tudoMudou();return}
+    capturar(e);des=true;pid=e.pointerId;ult=c;if(tool==='feito')valorFeito=FE()[c.i+c.j*P.w]?0:1;pintar(c);pedirEd()});
+  edCv.addEventListener('pointermove',e=>{if(des&&e.pointerId!==pid)return;const c=celula(e);if(c)info(c);if(!des||!c)return;
+    let x0=ult.i,y0=ult.j;const dx=Math.abs(c.i-x0),dy=-Math.abs(c.j-y0),sx=x0<c.i?1:-1,sy=y0<c.j?1:-1;let er=dx+dy;
+    for(;;){pintar({i:x0,j:y0});if(x0===c.i&&y0===c.j)break;const e2=2*er;if(e2>=dy){er+=dy;x0+=sx}if(e2<=dx){er+=dx;y0+=sy}}ult=c;pedirEd()});
+  const fim=e=>{if(des&&e.pointerId===pid){des=false;pid=null;renderLegenda();tudoMudou()}};edCv.addEventListener('pointerup',fim);edCv.addEventListener('pointercancel',fim)})();
+function info(c){const v=P.cells[c.i+c.j*P.w];const d=corDe(v);$('#edInfo').innerHTML=`Coluna <b class="mono">${c.i+1}</b> · Linha <b class="mono">${c.j+1}</b> · ${d?`${MAT().pref} <b>${d.code}</b> ${d.name}`:'vazio'}`}
+$('#tools').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;tool=b.dataset.t;document.querySelectorAll('#tools [data-t]').forEach(x=>x.classList.toggle('on',x===b));desenharEditor()});
+function zoomPara(nz){const w=$('#edWrap');nz=Math.max(4,Math.min(48,nz));const cx=(w.scrollLeft+w.clientWidth/2)/P.view.zoom,cy=(w.scrollTop+w.clientHeight/2)/P.view.zoom;P.view.zoom=nz;desenharEditor();w.scrollLeft=cx*nz-w.clientWidth/2;w.scrollTop=cy*nz-w.clientHeight/2;salvar()}
+function ajustarZoom(){const w=$('#edWrap');const aw=w.clientWidth-26,ah=(document.body.classList.contains('foco')?w.clientHeight:Math.min(w.clientHeight||innerHeight*0.74,innerHeight*0.74))-26;
+  P.view.zoom=Math.max(4,Math.min(48,Math.floor(Math.min(aw/P.w,ah/P.h))));desenharEditor();w.scrollLeft=w.scrollTop=0;salvar()}
+$('#bFit').onclick=ajustarZoom;
+$('#eDest').onchange=e=>{P.view.destaque=e.target.checked;desenharEditor();salvar()};
+function setFoco(on){document.body.classList.toggle('foco',on);$('#bFull').innerHTML=on?'✕ Sair da tela cheia':'⛶ Tela cheia';
+  const de=document.documentElement,fs=document.fullscreenElement||document.webkitFullscreenElement;
+  try{if(on&&!fs){const p=de.requestFullscreen?de.requestFullscreen():de.webkitRequestFullscreen&&de.webkitRequestFullscreen();if(p&&p.catch)p.catch(()=>{})}
+      else if(!on&&fs){const p=document.exitFullscreen?document.exitFullscreen():document.webkitExitFullscreen&&document.webkitExitFullscreen();if(p&&p.catch)p.catch(()=>{})}}catch(_){}
+  setTimeout(()=>{desenharEditor();if(on)ajustarZoom()},120)}
+$('#bFull').onclick=()=>{if(abaAtual!=='editor')abrirAba('editor');setFoco(!document.body.classList.contains('foco'))};
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!(document.fullscreenElement||document.webkitFullscreenElement)&&document.body.classList.contains('foco'))setFoco(false)}));
+document.addEventListener('keydown',e=>{if(abaAtual!=='editor'||e.ctrlKey||e.metaKey||e.altKey||e.target.matches('input,textarea,select'))return;const k=e.key.toLowerCase();
+  const tools={b:'lapis',e:'borracha',g:'balde',i:'conta',m:'mover',d:'feito'};
+  if(tools[k]){const b=document.querySelector(`#tools [data-t="${tools[k]}"]`);b&&b.click();e.preventDefault()}
+  else if(k==='f'){$('#bFull').click();e.preventDefault()}
+  else if(k==='s'){$('#eDest').click();e.preventDefault()}
+  else if(k==='0'){ajustarZoom();e.preventDefault()}
+  else if(k==='+'||k==='='){$('#bZp').click();e.preventDefault()}
+  else if(k==='-'){$('#bZm').click();e.preventDefault()}
+  else if(k==='escape'&&document.body.classList.contains('foco')&&!pickEl){setFoco(false)}});
+$('#bZm').onclick=()=>zoomPara(P.view.zoom-2);$('#bZp').onclick=()=>zoomPara(P.view.zoom+2);
+$('#eSim').onchange=e=>{P.view.simbolos=e.target.checked;desenharEditor();salvar()};
+function syncPen(){$('#bPen').classList.toggle('on',!!P.view.penOnly);$('#penTxt').textContent=P.view.penOnly?'ligado':'desligado'}
+$('#bPen').onclick=()=>{P.view.penOnly=!P.view.penOnly;P.view.penVisto=true;syncPen();salvar();setStatus(P.view.penOnly?'Só a caneta pinta; o dedo arrasta e dá zoom':'Dedo e caneta pintam')};
+$('#eCor').onchange=e=>{P.view.cores=e.target.checked;desenharEditor();salvar()};
+
+function proxSimbolo(){const usados=new Set(P.cores.map(c=>c.sym));return SYMS.find(s=>!usados.has(s))||'?'}
+function renderLegenda(){const cont=contagem();const leg=$('#leg');const fe=FE(),feitos=new Array(P.cores.length).fill(0);let algum=false;P.cells.forEach((v,k)=>{if(v>=0&&fe[k]){feitos[v]++;algum=true}});$('#legTit').textContent='Legenda '+MAT().pref;
+  let h=`<div class="li ${ativo===-1?'on':''}" data-i="-1"><div class="sw" style="background:#fbf9f3;color:#999">∅</div><div class="nm" style="grid-column:span 2">Vazio<small>${P.material==='hama'?'pino sem conta':'tecido / grade sem ponto'}</small></div><div></div><div></div></div>`;
+  P.cores.forEach((c,i)=>{const d=dmc(c.code);const n=cont[i],li=linhaInfo(n);
+    h+=`<div class="li ${ativo===i?'on':''}" data-i="${i}"><div class="sw" style="background:${d.hex};color:${lumi(d)>140?'#1a1a1a':'#fff'}">${c.sym}</div>
+    <input value="${c.code}" data-cod="${i}" autocomplete="off" aria-label="Código da cor"><div class="nm">${d.name}<small>${n?(P.material==='hama'?`${fmt(n)} ${MAT().un}`:`${fmt(li.m,1)} m · ${fmt(li.meadas,1)} meada`):'sem uso'}</small></div>
+    <div class="ct mono">${algum&&n?`<span style="color:${feitos[i]===n?'var(--ok)':'inherit'}">${fmt(feitos[i])}/${fmt(n)}</span>`:fmt(n)}</div><button class="x" data-del="${i}" title="Remover cor (pontos viram vazio)">✕</button></div>`});
+  leg.innerHTML=h}
+$('#leg').addEventListener('click',e=>{const del=e.target.closest('[data-del]');if(del){removerCor(+del.dataset.del);return}if(e.target.matches('input'))return;const li=e.target.closest('.li');if(li){ativo=+li.dataset.i;if(P.view.destaque)pedirEd();if(tool==='borracha'||tool==='conta'||tool==='mover'){tool='lapis';document.querySelectorAll('#tools [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t==='lapis'));desenharEditor()}renderLegenda()}});
+$('#leg').addEventListener('change',e=>{const el=e.target.closest('[data-cod]');if(!el)return;const i=+el.dataset.cod;const cod=normCod(el.value);if(!cod){el.value=P.cores[i].code;setStatus(`Código ${MAT().pref} não encontrado`,true);return}
+  const j=P.cores.findIndex(c=>c.code===cod);pushUndo();if(j>=0&&j!==i){for(let k=0;k<P.cells.length;k++)if(P.cells[k]===i)P.cells[k]=j;tirarIndice(i);ativo=j>i?j-1:j}else P.cores[i].code=cod;
+  desenharEditor();renderLegenda();tudoMudou()});
+function tirarIndice(i){P.cores.splice(i,1);for(let k=0;k<P.cells.length;k++){const v=P.cells[k];if(v===i)P.cells[k]=-1;else if(v>i)P.cells[k]=v-1}if(ativo>=P.cores.length)ativo=P.cores.length-1}
+async function removerCor(i){const n=contagem()[i];if(n&&!(await confirmar(`Remover ${MAT().pref} ${P.cores[i].code}? ${fmt(n)} ${MAT().un} ficam vazios.`,'Remover')))return;pushUndo();tirarIndice(i);desenharEditor();renderLegenda();tudoMudou()}
+$('#bAdd').onclick=()=>{const cod=normCod($('#addCod').value);if(!cod){setStatus(`Código ${MAT().pref} não encontrado`,true);return}const j=P.cores.findIndex(c=>c.code===cod);if(j>=0){ativo=j}else{pushUndo();P.cores.push({code:cod,sym:proxSimbolo()});ativo=P.cores.length-1}$('#addCod').value='';atualizarPrev();renderLegenda();tudoMudou()};
+$('#addCod').addEventListener('keydown',e=>{if(e.key==='Enter')$('#bAdd').click()});
+$('#bLimparCores').onclick=()=>{const c=contagem();if(!c.some(n=>n===0))return;pushUndo();for(let i=P.cores.length-1;i>=0;i--)if(c[i]===0)tirarIndice(i);if(ativo<0&&P.cores.length)ativo=0;renderLegenda();tudoMudou()};
+$('#bResize').onclick=()=>{const W=Math.max(2,Math.min(300,parseNum($('#rW').value)||P.w)),H=Math.max(2,Math.min(300,parseNum($('#rH').value)||P.h));if(W===P.w&&H===P.h)return;pushUndo();
+  const ox=Math.floor((W-P.w)/2),oy=Math.floor((H-P.h)/2);const n=new Array(W*H).fill(-1),nf=new Array(W*H).fill(0),fe=FE();for(let j=0;j<P.h;j++)for(let i=0;i<P.w;i++){const x=i+ox,y=j+oy;if(x>=0&&y>=0&&x<W&&y<H){n[x+y*W]=P.cells[i+j*P.w];nf[x+y*W]=fe[i+j*P.w]}}
+  P.w=W;P.h=H;P.cells=n;P.feito=nf;desenharEditor();renderLegenda();tudoMudou()};
+
+/* ---------- peça / grade ---------- */
+const G=()=>P.grade;
+function syncGradeUI(){const g=G();setVal('gFuro',g.furo);setVal('hPlaca',P.hama.placa);setVal('gPasso',g.passo);setVal('gEsp',g.esp);setVal('gParede',g.parede);setVal('gFolga',g.folga);setVal('gBorda',g.borda);$('#gAparar').checked=!!g.aparar;setVal('gMesa',g.mesa);setVal('gFios',g.fios)}
+bindNum('gFuro',{min:0.8,max:2.5},v=>{G().furo=v;renderGrade();tudoMudou()});
+bindNum('hPlaca',{min:5,max:60,int:true},v=>{P.hama.placa=v;renderGrade();tudoMudou();desenharEditor()});
+bindNum('gPasso',{min:1.8,max:4},v=>{G().passo=v;$('#gPreset').value='';renderGrade();tudoMudou()});
+bindNum('gEsp',{min:1.2,max:4},v=>{G().esp=v;$('#gPreset').value='';renderGrade();tudoMudou()});
+bindNum('gParede',{min:0.8,max:4},v=>{G().parede=v;renderGrade();tudoMudou()});
+bindNum('gFolga',{min:0.1,max:0.8},v=>{G().folga=v;renderGrade();tudoMudou()});
+bindNum('gBorda',{min:0,max:15},v=>{G().borda=v;renderGrade();tudoMudou()});
+$('#gAparar').onchange=e=>{G().aparar=e.target.checked;renderGrade();tudoMudou()};
+bindNum('gMesa',{min:30,max:1000,int:true},v=>{G().mesa=v;renderGrade();tudoMudou()});
+bindNum('gFios',{min:1,max:12,int:true},v=>{G().fios=v;renderGrade();tudoMudou()});
+$('#gPreset').onchange=e=>{if(!e.target.value)return;const[p,f]=e.target.value.split(',').map(Number);Object.assign(G(),{passo:p,furo:f});syncGradeUI();renderGrade();tudoMudou()};
+// Mesma conta da tampa de ponto cruz do 3D Workbench (furos centralizados, sempre em número ímpar por fileira)
+function caixa(){const g=G(),b=g.aparar?bboxDesenho():null,W=b?b.x1-b.x0+1:P.w,H=b?b.y1-b.y0+1:P.h;
+  const pitch=Math.max(1.8,Math.min(4,g.passo)),hole=Math.min(g.furo,pitch-0.8),impar=n=>n%2?n:n+1,hx=impar(W+1),hy=impar(H+1);
+  const e=g.parede+g.folga+Math.max(1.2,g.parede)+0.8+g.borda;
+  return{W,H,b,pitch,hole,hx,hy,e,w:Math.ceil((hx-1)*pitch+hole+2*e+0.1),d:Math.ceil((hy-1)*pitch+hole+2*e+0.1)}}
+function tamanhoPeca(){if(P.material==='hama')return{w:P.w*5,h:P.h*5};const c=caixa();return{w:c.w,h:c.d}}
+function placasHama(){const n=Math.max(5,P.hama.placa|0),cx=Math.ceil(P.w/n),cy=Math.ceil(P.h/n);return{cx,cy,n:cx*cy}}
+function renderGrade(){syncGradeUI();renderStats();const H=P.material==='hama';$('#pecaHama').hidden=!H;$('#pecaDMC').hidden=H;
+  $('#pecaTit').textContent=H?'Prévia das contas nas placas':'Prévia do bordado na grade';$('#pecaHint').textContent=H?'Vista de cima, em escala (5 mm por conta). Linhas verdes = divisão entre placas.':'Vista de cima, em escala. Cada ponto em X liga 4 furos vizinhos, então a grade tem um furo a mais que o desenho em cada direção.';
+  if(H){renderHama();desenharPlaca();return}
+  const g=G(),c=caixa(),av=[],lado=Math.min(2*c.w+12,2*c.d+12);
+  $('#gInfo').innerHTML=`<span>Desenho usado</span><b class="mono">${c.W} × ${c.H} pontos${c.b&&(c.W<P.w||c.H<P.h)?' (aparado)':''}</b>
+    <span>Tampa (furos)</span><b class="mono">${c.hx} × ${c.hy} = ${fmt(c.hx*c.hy)}</b>
+    <span>Caixa no Workbench</span><b class="mono" style="color:var(--ac)">${c.w} × ${c.d} mm</b>
+    <span>Tampa</span><b class="mono">${c.w} × ${c.d} × ${fmt(g.esp,1)} mm</b>
+    <span>Equivale a</span><b class="mono">Aida ${fmt(25.4/c.pitch,0)} (${fmt(25.4/c.pitch,1)} count)</b>
+    <span>Linha por ponto</span><b class="mono">≈ ${fmt(mmPorPonto()/10,1)} cm (${g.fios} fio${g.fios>1?'s':''})</b>`;
+  if(c.w>250||c.d>250)av.push(['err',`A caixa (${c.w} × ${c.d} mm) passa do máximo do Workbench (250 mm). Diminua o passo ou o desenho.`]);
+  if(c.w>g.mesa||c.d>g.mesa)av.push(['err',`Nem a tampa sozinha cabe na mesa de ${g.mesa} mm. Diminua o passo ou divida o desenho.`]);
+  else if(lado>g.mesa)av.push(['',`A tampa cabe na mesa, mas caixa e tampa juntas não (precisam de ${lado} mm). Imprima em duas mesas.`]);
+  if(c.hx>c.W+1||c.hy>c.H+1)av.push(['',`A tampa centraliza os furos, então sobra ${c.hx>c.W+1&&c.hy>c.H+1?'1 coluna e 1 linha':c.hx>c.W+1?'1 coluna':'1 linha'} de furos. É normal: o desenho fica centralizado.`]);
+  if(g.passo-g.furo<0.8)av.push(['err','Menos de 0,8 mm entre furos: o Workbench vai diminuir o furo. Use um furo menor ou passo maior.']);
+  if(g.passo<2.3)av.push(['','Passo pequeno pede linha fina (1–2 fios) e furo que passe a agulha. Faça um teste pequeno antes.']);
+  if(!av.some(a=>a[0]==='err'||a[0]===''))av.push(['ok',`Caixa e tampa cabem juntas na mesa de ${g.mesa} mm.`]);
+  $('#gAvisos').innerHTML=av.map(([k,t])=>`<div class="warn ${k}">${t}</div>`).join('');desenharPlaca()}
+function renderHama(){const pl=placasHama(),n=P.hama.placa,t=tamanhoPeca(),cont=contagem(),tot=cont.reduce((a,b)=>a+b,0);
+  $('#hInfo').innerHTML=`<span>Placas</span><b class="mono">${pl.n} (${pl.cx} × ${pl.cy})</b><span>Tamanho final</span><b class="mono">${fmt(t.w/10,1)} × ${fmt(t.h/10,1)} cm</b><span>Contas</span><b class="mono">${fmt(tot)}</b><span>Com 10% de sobra</span><b class="mono">${fmt(Math.ceil(tot*1.1))}</b>`;
+  let h='<table class="tl"><tr><th>Placa</th><th>Contas</th></tr>';for(let by=0;by<pl.cy;by++)for(let bx=0;bx<pl.cx;bx++){let c=0;for(let j=by*n;j<Math.min(P.h,(by+1)*n);j++)for(let i=bx*n;i<Math.min(P.w,(bx+1)*n);i++)if(P.cells[i+j*P.w]>=0)c++;h+=`<tr><td>Linha ${by+1}, coluna ${bx+1}</td><td class="mono">${fmt(c)}</td></tr>`}
+  $('#hPlacas').innerHTML=h+'</table>'}
+function desenharPlaca(){if(P.material==='hama'){desenharContas();return}const cv=$('#plateCv'),c=caixa(),p=c.pitch;const box=Math.min(620,(cv.parentElement.clientWidth||620)-20);const s=Math.min(box/c.w,box/c.d),dpr=window.devicePixelRatio||1;
+  const W=c.w*s,H=c.d*s;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.width=W+'px';cv.style.height=H+'px';const x=cv.getContext('2d');x.setTransform(dpr*s,0,0,dpr*s,dpr*W/2,dpr*H/2);
+  const r=Math.min(6,c.e);x.fillStyle='#ece8df';x.beginPath();x.roundRect?x.roundRect(-c.w/2,-c.d/2,c.w,c.d,r):x.rect(-c.w/2,-c.d/2,c.w,c.d);x.fill();
+  const iw=c.w-2*(G().parede+G().folga),id=c.d-2*(G().parede+G().folga);x.strokeStyle='rgba(0,0,0,.25)';x.lineWidth=0.4;x.setLineDash([2,1.5]);x.strokeRect(-iw/2,-id/2,iw,id);x.setLineDash([]);
+  const ox=-(c.hx-1)/2*p,oy=-(c.hy-1)/2*p,hf=c.hole/2;x.fillStyle='#5b5750';for(let j=0;j<c.hy;j++)for(let i=0;i<c.hx;i++)x.fillRect(ox+i*p-hf,oy+j*p-hf,c.hole,c.hole);
+  const i0=c.b?c.b.x0:0,j0=c.b?c.b.y0:0,sx=ox+Math.floor((c.hx-(c.W+1))/2)*p,sy=oy+Math.floor((c.hy-(c.H+1))/2)*p;x.lineCap='round';x.lineWidth=p*0.28;
+  for(let j=0;j<c.H;j++)for(let i=0;i<c.W;i++){const v=P.cells[(i+i0)+(j+j0)*P.w];if(v<0)continue;x.strokeStyle=corDe(v).hex;const X=sx+i*p,Y=sy+j*p;x.beginPath();x.moveTo(X,Y);x.lineTo(X+p,Y+p);x.moveTo(X+p,Y);x.lineTo(X,Y+p);x.stroke()}}
+function desenharContas(){const cv=$('#plateCv'),box=Math.min(620,(cv.parentElement.clientWidth||620)-20),cs=Math.max(3,Math.floor(Math.min(box/P.w,box/P.h))),dpr=window.devicePixelRatio||1,W=P.w*cs,H=P.h*cs;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.fillStyle='#f4f2ec';x.fillRect(0,0,W,H);
+  x.fillStyle='#d9d4c8';for(let j=0;j<P.h;j++)for(let i=0;i<P.w;i++){x.beginPath();x.arc(i*cs+cs/2,j*cs+cs/2,cs*0.12,0,7);x.fill()}
+  for(let j=0;j<P.h;j++)for(let i=0;i<P.w;i++){const v=P.cells[i+j*P.w];if(v<0)continue;x.fillStyle=corDe(v).hex;x.beginPath();x.arc(i*cs+cs/2,j*cs+cs/2,cs*0.47,0,7);x.arc(i*cs+cs/2,j*cs+cs/2,cs*0.17,0,7,true);x.fill('evenodd')}
+  const n=P.hama.placa;x.strokeStyle='rgba(79,179,169,.95)';x.lineWidth=2;x.beginPath();for(let i=n;i<P.w;i+=n){x.moveTo(i*cs,0);x.lineTo(i*cs,H)}for(let j=n;j<P.h;j+=n){x.moveTo(0,j*cs);x.lineTo(W,j*cs)}x.stroke()}
+function medidasTexto(){const g=G(),c=caixa();return`Ponto Cruz — ${P.nome}\nDesenho: ${c.W} × ${c.H} pontos\nCaixa (Workbench, Caixa e pote → tampa Ponto cruz): ${c.w} × ${c.d} mm\nFuros da tampa: ${c.hx} × ${c.hy}\nPasso dos furos: ${c.pitch} mm\nTamanho do furo: ${fmt(c.hole,2)} mm\nEspessura da tampa: ${g.esp} mm\nParede: ${g.parede} mm · Folga: ${g.folga} mm · Borda sem furos: ${g.borda} mm`}
+$('#bCopiarMed').onclick=async()=>{const txt=medidasTexto();try{await navigator.clipboard.writeText(txt);setStatus('Medidas copiadas')}catch(e){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e2){}ta.remove();setStatus(ok?'Medidas copiadas':'Não consegui copiar',!ok)}};
+$('#bExpGrade').onclick=()=>{const g=G(),c=caixa(),i0=c.b?c.b.x0:0,j0=c.b?c.b.y0:0;const mascara=[];for(let j=0;j<c.H;j++){let r='';for(let i=0;i<c.W;i++)r+=P.cells[(i+i0)+(j+j0)*P.w]>=0?'#':'.';mascara.push(r)}
+  const o={formato:'pontocruz-grade',versao:2,nome:P.nome,pontos:{colunas:c.W,linhas:c.H},furos:{colunas:c.W+1,linhas:c.H+1},passo_mm:c.pitch,furo_mm:g.furo,espessura_mm:g.esp,parede_mm:g.parede,folga_mm:g.folga,borda_mm:g.borda,caixa_mm:{largura:c.w,profundidade:c.d},
+    nota:'Furos ficam nos cantos de cada ponto. Máscara: # = ponto bordado, . = vazio (linha 1 = topo).',mascara};
+  baixar(new Blob([JSON.stringify(o,null,1)],{type:'application/json'}),`${slug()}_caixa_${c.w}x${c.d}.json`)};
+
+/* ---------- gráfico ---------- */
+function desenharGrafico(){$('#grafTit').textContent=P.material==='hama'?'Gráfico para montar':'Gráfico para bordar';const cv=$('#chartCv');const cont=contagem();const usadas=P.cores.map((c,i)=>({c,i,n:cont[i]})).filter(o=>o.n>0);
+  const cs=Math.max(12,Math.min(30,Math.floor(1500/P.w)));const ml=44,mt=96;const gw=P.w*cs,gh=P.h*cs;const W=Math.max(gw+ml+40,760);
+  const colL=Math.max(1,Math.floor((W-60)/360)),linL=Math.ceil(usadas.length/colL);const legH=60+linL*30+40;const H=mt+gh+30+legH;
+  cv.width=W;cv.height=H;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  x.fillStyle='#1d1d20';x.font='700 26px system-ui,sans-serif';x.textAlign='left';x.textBaseline='alphabetic';x.fillText(P.nome||'Ponto Cruz',ml,40);
+  x.font='14px system-ui,sans-serif';x.fillStyle='#666';const t=tamanhoPeca();const tot=cont.reduce((a,b)=>a+b,0);
+  const pl=placasHama();x.fillText(P.material==='hama'?`${P.w} × ${P.h} · ${fmt(tot)} contas Hama Midi · ${usadas.length} cores · ${pl.n} placa${pl.n>1?'s':''} ${P.hama.placa}×${P.hama.placa} (${pl.cx} × ${pl.cy}) · ${fmt(t.w,0)} × ${fmt(t.h,0)} mm`:`${P.w} × ${P.h} pontos · ${fmt(tot)} pontos bordados · ${usadas.length} cores DMC · grade passo ${fmt(G().passo,2)} mm (${fmt(t.w,0)} × ${fmt(t.h,0)} mm)`,ml,64);
+  const ox=ml,oy=mt;x.fillStyle='#fbf9f3';x.fillRect(ox,oy,gw,gh);desenharCelulas(x,cs,ox,oy,{cores:$('#kCor').checked,simbolos:true});desenharLinhas(x,cs,ox,oy);
+  x.fillStyle='#444';x.font='11px system-ui,sans-serif';x.textAlign='center';x.textBaseline='bottom';for(let i=0;i<=P.w;i+=5)if(i>0||true){const n=i===0?1:i;x.fillText(n,ox+(n-0.5)*cs,oy-4)}
+  x.textAlign='right';x.textBaseline='middle';for(let j=0;j<=P.h;j+=5){const n=j===0?1:j;x.fillText(n,ox-6,oy+(n-0.5)*cs)}
+  let ly=oy+gh+50;x.textAlign='left';x.textBaseline='alphabetic';x.font='700 16px system-ui,sans-serif';x.fillStyle='#1d1d20';x.fillText(`Legenda de cores (${MAT().pref})`,ml,ly);ly+=16;
+  usadas.forEach((o,k)=>{const col=k%colL,lin=Math.floor(k/colL);const lx=ml+col*360,yy=ly+lin*30;const d=dmc(o.c.code);
+    x.fillStyle=d.hex;x.fillRect(lx,yy,22,22);x.strokeStyle='#0004';x.strokeRect(lx+.5,yy+.5,21,21);x.fillStyle=lumi(d)>140?'#1a1a1a':'#fff';x.font='700 13px system-ui,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(o.c.sym,lx+11,yy+12);
+    x.textAlign='left';x.fillStyle='#1d1d20';x.font='700 13px system-ui,sans-serif';x.fillText(d.code,lx+32,yy+11);x.font='13px system-ui,sans-serif';x.fillStyle='#444';
+    const li=linhaInfo(o.n);x.fillText(P.material==='hama'?`${d.name} — ${fmt(o.n)} contas`:`${d.name} — ${fmt(o.n)} pts · ${fmt(Math.max(1,Math.ceil(li.meadas)))} meada${Math.ceil(li.meadas)>1?'s':''}`,lx+82,yy+11)});
+  x.textAlign='left';x.font='11px system-ui,sans-serif';x.fillStyle='#999';x.fillText(P.material==='hama'?'Tracejado = centro. Linhas verdes = divisão entre placas. Cores de tela são aproximadas — confira nas contas.':'Linhas tracejadas = centro. Linhas grossas a cada 10 pontos. Cores de tela são aproximadas — confira na cartela DMC.',ml,H-14)}
+$('#kCor').onchange=desenharGrafico;
+$('#bPNG').onclick=()=>{desenharGrafico();$('#chartCv').toBlob(b=>baixar(b,`${slug()}_grafico.png`))};
+$('#bPrint').onclick=()=>{desenharGrafico();$('#printImg').src=$('#chartCv').toDataURL('image/png');setTimeout(()=>window.print(),100)};
+
+/* ---------- seletor de cor (abre ao tocar) ---------- */
+let pickEl=null,pickFor=null;
+function fecharPicker(){if(pickEl){pickEl.remove();pickEl=null;pickFor=null}}
+function abrirPicker(inp,onPick){fecharPicker();pickFor={inp,onPick,filtrar:false};pickEl=document.createElement('div');pickEl.className='pick';pickEl.setAttribute('role','listbox');document.body.appendChild(pickEl);
+  pickEl.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')e.preventDefault()});
+  pickEl.addEventListener('click',e=>{const r=e.target.closest('[data-c]');if(!r)return;const f=pickFor;const cod=r.dataset.c;fecharPicker();f.inp.value=cod;f.onPick(cod)});
+  renderPicker();posPicker()}
+function posPicker(){if(!pickEl)return;const r=pickFor.inp.getBoundingClientRect(),w=Math.max(270,r.width+40),below=innerHeight-r.bottom;pickEl.style.width=w+'px';pickEl.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+'px';
+  if(below<260&&r.top>below){pickEl.style.top='auto';pickEl.style.bottom=(innerHeight-r.top+4)+'px';pickEl.style.maxHeight=Math.min(340,r.top-12)+'px'}else{pickEl.style.bottom='auto';pickEl.style.top=(r.bottom+4)+'px';pickEl.style.maxHeight=Math.min(340,below-12)+'px'}}
+function renderPicker(){if(!pickEl)return;const q=pickFor.filtrar?pickFor.inp.value.trim().toUpperCase().replace(/^H(?=\d)/,''):'';const atual=normCod(pickFor.inp.value);
+  const lista=MAT().lista.filter(d=>!q||d.code.toUpperCase().startsWith(q)||d.name.toUpperCase().includes(q));
+  pickEl.innerHTML=lista.length?lista.map(d=>`<div data-c="${d.code}" class="${d.code===atual?'on':''}"><i style="background:${d.hex}"></i><b>${d.code}</b><span>${d.name}</span></div>`).join(''):'<p class="muted" style="margin:8px">Nenhuma cor com esse código ou nome.</p>';
+  const on=pickEl.querySelector('.on');if(on&&!pickFor.filtrar)pickEl.scrollTop=on.offsetTop-pickEl.clientHeight/2+18}
+document.addEventListener('pointerdown',e=>{if(pickEl&&!pickEl.contains(e.target)&&e.target!==pickFor.inp)fecharPicker()},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharPicker()});
+window.addEventListener('scroll',e=>{if(pickEl&&e.target!==pickEl&&!(pickEl.contains&&pickEl.contains(e.target)))posPicker()},true);
+window.addEventListener('resize',posPicker);
+function ligarPicker(inp,onPick){inp.addEventListener('focus',()=>{inp.select();abrirPicker(inp,onPick)});inp.addEventListener('click',()=>{if(!pickEl)abrirPicker(inp,onPick)});
+  inp.addEventListener('input',()=>{if(!pickEl)abrirPicker(inp,onPick);pickFor.filtrar=true;renderPicker()})}
+function atualizarPrev(){const d=dmc($('#addCod').value);const el=$('#addPrev');el.style.background=d?d.hex:'';el.classList.toggle('vazio',!d);el.title=d?`${MAT().pref} ${d.code} — ${d.name}`:''}
+ligarPicker($('#addCod'),()=>atualizarPrev());$('#addCod').addEventListener('input',atualizarPrev);
+$('#leg').addEventListener('focusin',e=>{const el=e.target.closest('[data-cod]');if(!el||el._pk)return;el._pk=1;ligarPicker(el,()=>el.dispatchEvent(new Event('change',{bubbles:true})));el.select();abrirPicker(el,()=>el.dispatchEvent(new Event('change',{bubbles:true})))});
+
+/* ---------- material ---------- */
+function syncMaterialUI(){const m=MAT(),H=P.material==='hama';$('#material').value=P.material;$('#lblCores').textContent=m.cores;$('#optTodas').textContent=m.todas;$('#vCodigos').placeholder=m.ex;
+  $('#optLista').textContent=H?'Só as cores Hama desta lista ↓':'Só as linhas desta lista ↓';$('#hintLista').textContent=H?'Códigos separados por espaço ou vírgula — use as cores de contas que você já tem.':'Códigos separados por espaço ou vírgula — use as linhas que você já tem.';
+  $('#lblAdd').textContent=H?'Adicionar cor de conta':'Adicionar linha';$('#hintLeg').textContent=H?'Toque no código de uma cor para trocar a conta. Se a nova já existir na legenda, as duas se juntam.':'Toque no código de uma cor para trocar a linha. Se a nova já existir na legenda, as duas se juntam.';
+  $('#addCod').value='';atualizarPrev();fecharPicker();document.querySelector('[data-aba=grade]').lastChild.textContent='3 · '+(P.material==='hama'?'Placas':'Peça')}
+$('#material').onchange=async e=>{const novo=e.target.value;if(novo===P.material)return;
+  if(P.cores.length&&!(await confirmar(`Trocar para ${MATS[novo].nome}? Cada cor do desenho vira a mais parecida da nova paleta (dá para desfazer).`,'Trocar'))){e.target.value=P.material;return}
+  pushUndo();P.codigosMat[P.material]=C().codigos;const lista=MATS[novo].lista;
+  const mapa=P.cores.map(c=>{const d=dmc(c.code);let b=lista[0],bd=1e9;for(const q of lista){const dd=dE(d.lab,q.lab);if(dd<bd){bd=dd;b=q}}return b.code});
+  P.material=novo;const novas=[],idx=new Map();mapa.forEach((cd,i)=>{if(!idx.has(cd)){idx.set(cd,novas.length);novas.push({code:cd,sym:P.cores[i].sym})}});
+  P.cells=P.cells.map(v=>v<0?-1:idx.get(mapa[v]));P.cores=novas;if(ativo>=P.cores.length)ativo=P.cores.length?0:-1;
+  C().codigos=P.codigosMat[novo]||'';if(!C().codigos&&C().paleta==='lista')C().paleta='todas';
+  if(novo==='hama'&&P.view.zoom<12)P.view.zoom=12;
+  syncMaterialUI();syncConvUI();agendarPrev();renderLegenda();desenharEditor();if(abaAtual==='grade')renderGrade();if(abaAtual==='grafico')desenharGrafico();tudoMudou()};
+
+/* ---------- topo ---------- */
+$('#nome').addEventListener('input',e=>{P.nome=e.target.value;salvar()});
+$('#bNovo').onclick=async()=>{if(!(await confirmar('Começar um projeto novo? O atual será apagado deste navegador (salve o .json antes se quiser guardar).','Começar novo')))return;P=novoProjeto();IMG=null;undo=[];redo=[];ativo=0;ultimo=null;init()};
+$('#bSalvar').onclick=()=>baixar(new Blob([JSON.stringify(P)],{type:'application/json'}),`${slug()}.pontocruz.json`);
+$('#bAbrir').onclick=()=>$('#fJson').click();
+$('#fJson').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const fr=new FileReader();fr.onload=()=>{try{P=normalizar(JSON.parse(fr.result));IMG=null;undo=[];redo=[];ativo=P.cores.length?0:-1;ultimo=null;init();salvar()}catch(err){setStatus('Arquivo .json inválido',true)}};fr.readAsText(f)};
+$('#bTema').onclick=()=>{const t=document.documentElement.dataset.tema==='claro'?'escuro':'claro';document.documentElement.dataset.tema=t;try{localStorage.setItem(KEY_TEMA,t)}catch(e){}};
+window.addEventListener('resize',()=>{clearTimeout(window._rz);window._rz=setTimeout(()=>{desenharCrop();if(abaAtual==='grade')renderGrade()},150)});
+
+function init(){$('#nome').value=P.nome;syncMaterialUI();
+  syncConvUI();syncGradeUI();renderStats();if(ativo>=P.cores.length)ativo=P.cores.length?0:-1;
+  if(P.fonte)carregarImagem(P.fonte,()=>{if(!P.crop)P.crop={x:0,y:0,w:IMG.width,h:IMG.height};mostrarCrop();agendarPrev()});else{IMG=null;mostrarCrop();desenharPrev()}
+  abrirAba(P.cells.some(v=>v>=0)?'editor':'importar')}
+if(EMBUTIDO){$('#bPrint').hidden=true;$('#bPNG').classList.add('pri')}
+try{const t=localStorage.getItem(KEY_TEMA);if(t)document.documentElement.dataset.tema=t}catch(e){}
+carregar();init();setStatus('Salvo localmente');
+</script>
+<script>
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
+</body>
+</html>
