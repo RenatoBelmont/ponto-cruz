@@ -98,6 +98,12 @@ table.tl td{padding:6px;border-bottom:1px solid var(--bd)}
 .modal .box p{margin:0 0 16px}
 .modal .acts{display:flex;gap:8px;justify-content:flex-end}
 #printArea{display:none}
+#sug{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+#sug .op{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;border:1px solid var(--bd);background:var(--sf2);border-radius:10px;padding:8px 10px;cursor:pointer;width:100%}
+#sug .op:hover,#sug .op.on{border-color:var(--ac)}
+#sug .op b{font-size:13.5px}#sug .op small{color:var(--mu);font-size:12px;grid-column:1/-1}
+#sug .op .fid{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ac);align-self:center}
+#sug .bar{height:4px;border-radius:2px;background:var(--bd);grid-column:1/-1;overflow:hidden}#sug .bar i{display:block;height:100%;background:var(--ac)}
 .sw2{width:20px;height:20px;border-radius:5px;border:1px solid #0004;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 #bCor b{min-width:38px;text-align:left}
 .pal{position:fixed;z-index:70;background:var(--sf);border:1px solid var(--bd);border-radius:14px;box-shadow:0 18px 50px -12px #000c;padding:10px;max-height:70vh;overflow:auto;width:min(360px,calc(100vw - 16px));touch-action:pan-y}
@@ -204,6 +210,8 @@ body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 1
           <div class="f n"><label>Linhas</label><input type="text" inputmode="decimal" autocomplete="off" id="vH"></div>
           <label class="chk" style="margin-bottom:8px"><input type="checkbox" id="vLock"> manter proporção do recorte</label>
         </div>
+        <button class="btn" id="bSugerir" style="margin-top:10px;width:100%;justify-content:center" disabled>✨ Sugerir tamanho da grade</button>
+        <div id="sug"></div>
         <div class="row" style="margin-top:10px">
           <div class="f" style="flex:1"><label>Amostragem</label>
             <select id="vAmostra">
@@ -456,7 +464,7 @@ const MATS={
   hama:{nome:'Hama Beads (Midi 5 mm)',lista:HAMA,by:HAMA_BY,pref:'Hama',un:'contas',Un:'Contas',un1:'conta',cores:'Cores Hama permitidas',todas:'Todas as cores Hama Midi da lista',ex:'Ex.: 01 03 04 05 10 11 18 21',
     norm:s=>{s=s.toUpperCase().replace(/^H/,'');if(/^\d$/.test(s))s='0'+s;return HAMA_BY[s]?s:null}}};
 const MAT=()=>MATS[(typeof P!=='undefined'&&P&&P.material)||'dmc'];
-const dmc=c=>{const m=MAT();return m.by[m.norm(String(c))]};
+const dmc=c=>{const m=MAT(),k=m.norm(String(c));return k?(m.by[k]||m.by[String(k).toUpperCase()]):undefined};
 function normCod(s){return MAT().norm(String(s).trim())}
 const lumi=d=>0.299*d.r+0.587*d.g+0.114*d.b;
 
@@ -537,7 +545,7 @@ function arquivoImagem(file){if(!file||!file.type.startsWith('image/'))return;co
   const im=new Image();im.onload=()=>{const max=1800,s=Math.min(1,max/Math.max(im.width,im.height));const cv=document.createElement('canvas');cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);
     const x=cv.getContext('2d');x.drawImage(im,0,0,cv.width,cv.height);P.fonte=cv.toDataURL(file.type==='image/jpeg'?'image/jpeg':'image/png',0.92);
     if(P.fonte.length>3.5e6)P.fonte=cv.toDataURL('image/jpeg',0.9);
-    FONTES.length=0;$('#bDescortar').disabled=true;carregarImagem(P.fonte,()=>{P.crop={x:0,y:0,w:IMG.width,h:IMG.height};const x2=IMG; // cor do fundo = canto
+    FONTES.length=0;$('#bDescortar').disabled=true;$('#sug').innerHTML='';carregarImagem(P.fonte,()=>{P.crop={x:0,y:0,w:IMG.width,h:IMG.height};const x2=IMG; // cor do fundo = canto
       const t=document.createElement('canvas');t.width=t.height=1;const tx=t.getContext('2d');tx.drawImage(x2,0,0,1,1,0,0,1,1);const d=tx.getImageData(0,0,1,1).data;C().fundoCor=toHex(d[0],d[1],d[2]);
       if(C().lock)ajustarAltura();syncConvUI();mostrarCrop();agendarPrev();salvar()})};im.src=fr.result};fr.readAsDataURL(file)}
 $('#drop').onclick=()=>$('#fImg').click();$('#bTrocarImg').onclick=()=>$('#fImg').click();
@@ -545,7 +553,7 @@ $('#fImg').onchange=e=>{arquivoImagem(e.target.files[0]);e.target.value=''};
 ['dragover','dragenter'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();$('#drop').classList.add('over')}));
 ['dragleave','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();$('#drop').classList.remove('over')}));
 document.addEventListener('drop',e=>{const f=e.dataTransfer&&e.dataTransfer.files[0];if(f){abrirAba('importar');arquivoImagem(f)}});
-function mostrarCrop(){const tem=!!IMG;$('#drop').hidden=tem;$('#cropArea').hidden=!tem;$('#bTrocarImg').hidden=!tem;$('#bAplicar').disabled=!tem;desenharCrop()}
+function mostrarCrop(){const tem=!!IMG;$('#bSugerir').disabled=!tem;if(!tem)$('#sug').innerHTML='';$('#drop').hidden=tem;$('#cropArea').hidden=!tem;$('#bTrocarImg').hidden=!tem;$('#bAplicar').disabled=!tem;desenharCrop()}
 function ajustarAltura(){if(!P.crop)return;C().h=Math.max(2,Math.min(300,Math.round(C().w*P.crop.h/P.crop.w)))}
 let pickFundo=false;
 function desenharCrop(){if(!IMG||abaAtual!=='importar')return;const cv=$('#cropCv'),wrap=cv.parentElement;const W=wrap.clientWidth||600;const s=W/IMG.width;const dpr=window.devicePixelRatio||1;
@@ -566,7 +574,7 @@ function desenharCrop(){if(!IMG||abaAtual!=='importar')return;const cv=$('#cropC
 ['cX','cY','cW','cH'].forEach(id=>$('#'+id).addEventListener('input',()=>{if(!IMG||!P.crop)return;let x=parseNum($('#cX').value),y=parseNum($('#cY').value),w=parseNum($('#cW').value),h=parseNum($('#cH').value);if([x,y,w,h].some(isNaN)||w<4||h<4)return;
   x=Math.max(0,Math.min(IMG.width-4,x));y=Math.max(0,Math.min(IMG.height-4,y));w=Math.min(w,IMG.width-x);h=Math.min(h,IMG.height-y);P.crop={x,y,w,h};if(C().lock){ajustarAltura();syncConvUI()}desenharCrop();agendarPrev();salvar()}));
 const FONTES=[];
-$('#bCortar').onclick=()=>{if(!IMG||!P.crop)return;const c=P.crop;if(c.x<=0.5&&c.y<=0.5&&c.w>=IMG.width-1&&c.h>=IMG.height-1){setStatus('Arraste sobre a imagem para escolher a área antes de cortar',true);return}
+$('#bCortar').onclick=()=>{if(!IMG||!P.crop)return;$('#sug').innerHTML='';const c=P.crop;if(c.x<=0.5&&c.y<=0.5&&c.w>=IMG.width-1&&c.h>=IMG.height-1){setStatus('Arraste sobre a imagem para escolher a área antes de cortar',true);return}
   const cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(c.w));cv.height=Math.max(1,Math.round(c.h));cv.getContext('2d').drawImage(IMG,c.x,c.y,c.w,c.h,0,0,cv.width,cv.height);
   FONTES.push(P.fonte);if(FONTES.length>10)FONTES.shift();P.fonte=cv.width*cv.height>1.2e6?cv.toDataURL('image/jpeg',0.92):cv.toDataURL('image/png');
   carregarImagem(P.fonte,()=>{P.crop={x:0,y:0,w:IMG.width,h:IMG.height};if(C().lock)ajustarAltura();$('#bDescortar').disabled=false;syncConvUI();desenharCrop();agendarPrev();salvar();setStatus('Imagem cortada')})};
@@ -639,6 +647,63 @@ $('#bAplicar').onclick=async()=>{if(!ultimo)ultimo=converter();if(!ultimo)return
 $('#bBranco').onclick=async()=>{lerConvUI();if(P.cells.some(v=>v>=0)&&!(await confirmar('Criar uma grade em branco no lugar do gráfico atual?','Criar')))return;pushUndo();
   const W=C().w,H=C().lock&&P.crop?C().h:C().h;P.w=W;P.h=H;P.cells=new Array(W*H).fill(-1);P.feito=null;
   if(!P.cores.length)P.cores=[{code:'310',sym:SYMS[0]}];ativo=0;tudoMudou();abrirAba('editor')};
+
+/* ---------- sugestão automática do tamanho da grade ---------- */
+// 1) Pixel art / gráfico pronto: acha o período das bordas (autocorrelação + refino) e alinha o recorte.
+// 2) Foto / ilustração: mede quanto detalhe cada tamanho preserva e propõe 3 tamanhos.
+function amostraCrop(maxLado){const cr=P.crop,s=Math.min(1,maxLado/Math.max(cr.w,cr.h)),W=Math.max(8,Math.round(cr.w*s)),H=Math.max(8,Math.round(cr.h*s));
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d',{willReadFrequently:true});x.imageSmoothingQuality='high';x.drawImage(IMG,cr.x,cr.y,cr.w,cr.h,0,0,W,H);return{W,H,s,d:x.getImageData(0,0,W,H).data}}
+function perfisBorda(a){const{W,H,d}=a,px=new Float64Array(W),py=new Float64Array(H);
+  for(let y=0;y<H;y++)for(let x=1;x<W;x++){const o=(y*W+x)*4,q=o-4;px[x]+=Math.abs(d[o]-d[q])+Math.abs(d[o+1]-d[q+1])+Math.abs(d[o+2]-d[q+2])}
+  for(let y=1;y<H;y++)for(let x=0;x<W;x++){const o=(y*W+x)*4,q=o-W*4;py[y]+=Math.abs(d[o]-d[q])+Math.abs(d[o+1]-d[q+1])+Math.abs(d[o+2]-d[q+2])}
+  return{px,py}}
+function periodo(pr){const n=pr.length;let m=0;for(let i=1;i<n;i++)m+=pr[i];m/=(n-1)||1;if(m<1e-6)return null;
+  const z=Array.from(pr,(v,i)=>i?v-m:0),maxLag=Math.floor(n/4),ac=new Float64Array(maxLag+1);let a0=0;for(let i=1;i<n;i++)a0+=z[i]*z[i];if(a0<1e-9)return null;
+  for(let L=3;L<=maxLag;L++){let s=0;for(let i=1;i+L<n;i++)s+=z[i]*z[i+L];ac[L]=s/a0}
+  let mx=0;for(let L=3;L<=maxLag;L++)if(ac[L]>mx)mx=ac[L];if(mx<0.12)return null;
+  let p0=0;for(let L=3;L<=maxLag;L++)if(ac[L]>=0.8*mx&&ac[L]>=ac[L-1]&&ac[L]>=(ac[L+1]||0)){p0=L;break}if(!p0)return null;
+  const val=x=>{const i=Math.round(x);return i>0&&i<n?Math.max(pr[i],pr[i-1]||0,pr[i+1]||0):0};let best={sc:0};
+  for(let p=p0*0.96;p<=p0*1.04;p+=0.02){const passo=Math.max(0.5,p/14);for(let f=0;f<p;f+=passo){let s=0,k=0;for(let x=f;x<n;x+=p){if(x<1)continue;s+=val(x);k++}if(k<3)continue;const sc=s/k/m;if(sc>best.sc)best={sc,p,f}}}
+  return best.p?best:null}
+function sugerirTamanho(){if(!IMG||!P.crop)return;const box=$('#sug');box.innerHTML='<span class="hint">Analisando a imagem…</span>';
+  setTimeout(()=>{try{
+    // descarta margens lisas (fundo da mesma cor do canto) antes de procurar a grade
+    const orig=P.crop,a0=amostraCrop(1400);{const{W,H,d}=a0,bg=[d[0],d[1],d[2]];let x0=W,x1=-1,y0=H,y1=-1;for(let y=0;y<H;y++)for(let x=0;x<W;x++){const o=(y*W+x)*4;if(Math.abs(d[o]-bg[0])+Math.abs(d[o+1]-bg[1])+Math.abs(d[o+2]-bg[2])>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
+      if(x1>x0&&y1>y0&&(x0>2||y0>2||x1<W-3||y1<H-3))P.crop={x:orig.x+x0/a0.s,y:orig.y+y0/a0.s,w:(x1-x0+1)/a0.s,h:(y1-y0+1)/a0.s}}
+    const a=amostraCrop(1400),{px,py}=perfisBorda(a),gx=periodo(px),gy=periodo(py),s=a.s;const base=P.crop;P.crop=orig;
+    const quad=gx&&gy&&Math.abs(gx.p-gy.p)/Math.max(gx.p,gy.p)<0.2;
+    const ini=(g,len)=>{let x0=g.f%g.p;if(x0<1.5||x0>g.p-1.5)x0=0;const n=Math.max(1,Math.floor((len-x0)/g.p+0.25));return{x0,n}};
+    let gradeHTML='',aplicarGrade=null;
+    if(gx&&gy&&quad&&gx.p>=3&&gx.sc>1.5&&gy.sc>1.5){
+      const exata=gx.sc>2.1&&gy.sc>2.1;const X=ini(gx,a.W),Y=ini(gy,a.H);const cx=base.x+X.x0/s,cy=base.y+Y.x0/s;
+      const nc={x:cx,y:cy,w:Math.min(IMG.width-cx,X.n*gx.p/s),h:Math.min(IMG.height-cy,Y.n*gy.p/s)};
+      aplicarGrade=()=>{P.crop=nc;C().lock=false;C().w=X.n;C().h=Y.n;C().amostra='centro';syncConvUI();desenharCrop();agendarPrev();salvar();setStatus(`Grade ${X.n} × ${Y.n} aplicada`)};
+      gradeHTML=exata
+        ?`<div class="warn ok">Encontrei uma grade pronta na imagem: <b>${X.n} × ${Y.n}</b> quadradinhos de ~${fmt(gx.p/s,1)} px. Por ser pixel art ou gráfico, esse é o tamanho certo: um ponto para cada quadradinho.</div>
+          <button class="op on" data-g="1"><b>Usar ${X.n} × ${Y.n} e alinhar o recorte</b><span class="fid">exato</span><small>${tamTxt(X.n,Y.n)} · amostragem pelo centro de cada quadradinho</small></button>`
+        :`<div class="warn">Parece um desenho em quadradinhos, mas eles não têm todos o mesmo tamanho (comum em imagem gerada por IA). A melhor aproximação é <b>${X.n} × ${Y.n}</b> (~${fmt(gx.p/s,1)} px cada) — confira a grade laranja sobre a imagem.</div>
+          <button class="op on" data-g="1"><b>Usar ${X.n} × ${Y.n} (grade aproximada)</b><span class="fid">≈</span><small>${tamTxt(X.n,Y.n)} · amostragem pelo centro de cada quadradinho</small></button>`;
+      if(exata){box.innerHTML=gradeHTML;box.querySelector('[data-g]').onclick=aplicarGrade;return}}
+    // foto/ilustração: curva de fidelidade
+    const R0=Math.min(320,Math.max(a.W,a.H)),ref=amostraCrop(R0),RW=ref.W,RH=ref.H,asp=P.crop.h/P.crop.w;
+    const cv=document.createElement('canvas'),x=cv.getContext('2d',{willReadFrequently:true}),up=document.createElement('canvas');up.width=RW;up.height=RH;const ux=up.getContext('2d',{willReadFrequently:true});
+    const erro=N=>{const M=Math.max(2,Math.round(N*asp));cv.width=N;cv.height=M;x.imageSmoothingQuality='high';x.drawImage(IMG,P.crop.x,P.crop.y,P.crop.w,P.crop.h,0,0,N,M);ux.imageSmoothingEnabled=false;ux.clearRect(0,0,RW,RH);ux.drawImage(cv,0,0,RW,RH);
+      const u=ux.getImageData(0,0,RW,RH).data,r=ref.d;let e=0;for(let i=0;i<r.length;i+=4)e+=Math.abs(u[i]-r[i])+Math.abs(u[i+1]-r[i+1])+Math.abs(u[i+2]-r[i+2]);return e/(RW*RH)};
+    const maxN=Math.max(24,Math.min(200,Math.floor(RW/1.6))),Ns=[];for(let N=12;N<=maxN;N=Math.round(N*1.12)+1)Ns.push(N);if(Ns[Ns.length-1]!==maxN)Ns.push(maxN);
+    const E=Ns.map(erro),e0=E[0],e1=E[E.length-1];const fid=i=>e0-e1<1e-6?1:(e0-E[i])/(e0-e1);
+    const achar=t=>{for(let i=0;i<Ns.length;i++)if(fid(i)>=t)return i;return Ns.length-1};
+    const ops=[['Compacto',0.6,'O desenho fica reconhecível, com menos detalhe. Borda mais rápido.'],['Recomendado',0.8,'Bom equilíbrio entre detalhe e tamanho.'],['Alta fidelidade',0.92,'Quase todo o detalhe da imagem. Peça grande e mais pontos.']]
+      .map(([n,t,dsc])=>{const i=achar(t);const N=Ns[i];return{n,N,M:Math.max(2,Math.round(N*asp)),f:fid(i),dsc}});
+    if(P.material!=='hama'){const g=G(),Nm=Math.floor((g.mesa-20)/g.passo/Math.max(1,asp));if(Nm>=12&&Nm<ops[ops.length-1].N){let i=0;while(i<Ns.length-1&&Ns[i+1]<=Nm)i++;const f0=fid(i);ops.push({n:'Maior que cabe na mesa',N:Nm,M:Math.max(2,Math.round(Nm*asp)),f:f0,dsc:`O máximo para a mesa de ${g.mesa} mm com esse passo.`})}}
+    ops.sort((p,q)=>p.N-q.N);
+    const vist=new Set();const lista=ops.filter(o=>{const k=o.N;if(vist.has(k))return false;vist.add(k);return true});
+    box.innerHTML=gradeHTML+`<span class="hint">${gradeHTML?'Ou, tratando como imagem comum, m':'M'}edi quanto detalhe cada tamanho preserva (de 12 a ${maxN} colunas):</span>`+lista.map((o,k)=>`<button class="op${o.n==='Recomendado'?' on':''}" data-k="${k}"><b>${o.n} · ${o.N} × ${o.M}</b><span class="fid">${fmt(o.f*100,0)}%</span><span class="bar"><i style="width:${Math.round(o.f*100)}%"></i></span><small>${tamTxt(o.N,o.M)} · ${o.dsc}</small></button>`).join('');
+    if(gradeHTML){box.querySelector('.op.on')&&box.querySelectorAll('.op[data-k]').forEach(q=>q.classList.remove('on'));box.querySelector('[data-g]').onclick=aplicarGrade}
+    box.querySelectorAll('.op[data-k]').forEach(b=>b.onclick=()=>{const o=lista[+b.dataset.k];box.querySelectorAll('.op').forEach(q=>q.classList.toggle('on',q===b));C().w=o.N;C().h=o.M;C().lock=true;C().amostra='media';syncConvUI();desenharCrop();agendarPrev();salvar()});
+  }catch(err){box.innerHTML='<div class="warn err">Não consegui analisar essa imagem.</div>'}},30)}
+function tamTxt(N,M){const pts=fmt(N*M)+' '+MAT().un;if(P.material==='hama'){const n=P.hama.placa,pl=Math.ceil(N/n)*Math.ceil(M/n);return`${pts} · ${fmt(N*0.5,1)} × ${fmt(M*0.5,1)} cm · ${pl} placa${pl>1?'s':''}`}
+  const g=G(),w=N*g.passo/10,h=M*g.passo/10,cabe=Math.max(N,M)*g.passo+20<=g.mesa;return`${pts} · ≈ ${fmt(w,1)} × ${fmt(h,1)} cm (passo ${fmt(g.passo,1)} mm)${cabe?'':' · <span style="color:var(--err)">não cabe na mesa</span>'}`}
+$('#bSugerir').onclick=sugerirTamanho;
 
 /* ---------- editor ---------- */
 const edCv=$('#edCv');
