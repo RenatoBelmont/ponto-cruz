@@ -122,10 +122,20 @@ body.foco main{max-width:none;padding:8px}
 body.foco #aba-editor .g2e{gap:8px;grid-template-columns:minmax(0,1fr) 300px}
 body.foco #aba-editor .card{margin-bottom:8px;padding:10px}
 body.foco #cardTam,body.foco #edInfo,body.foco #hintLeg{display:none}
-body.foco .edwrap{height:calc(100vh - 86px);height:calc(100dvh - 86px);max-height:none}
+body.foco .edwrap{max-height:none;height:100%}
+.edrow{display:flex;gap:8px;min-height:0}
+.edrow .edwrap{flex:1;min-width:0}
+#faixa{display:none}
+body.foco #faixa{display:flex;flex-direction:column;gap:4px;width:92px;flex:none;overflow-y:auto;overflow-x:hidden;background:var(--sf2);border-radius:10px;padding:6px;touch-action:pan-y;overscroll-behavior:contain}
+#faixa>*{flex:none}
+#faixa .fh{font-size:9.5px;line-height:1.15;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);font-weight:700;margin:6px 2px 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#faixa button{display:flex;align-items:center;gap:6px;border:2px solid transparent;background:none;border-radius:9px;padding:3px;cursor:pointer;width:100%}
+#faixa button.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,transparent)}
+#faixa .q{width:34px;height:34px;flex:none;border-radius:7px;border:1px solid #0004;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+#faixa b{font-size:11.5px;font-family:ui-monospace,Menlo,monospace;overflow:hidden;text-overflow:ellipsis}
 body.foco .leg{max-height:calc(100vh - 210px);max-height:calc(100dvh - 210px)}
 body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 16%,var(--sf2))}
-@media (max-width:820px){body.foco #aba-editor .g2e{grid-template-columns:minmax(0,1fr)}body.foco .card h3 .sp~*{display:none}body.foco .edwrap{height:calc(100dvh - 230px)}body.foco .leg{max-height:120px;flex-direction:row;flex-wrap:wrap}body.foco .li{grid-template-columns:30px}body.foco .li>:not(.sw){display:none}}
+@media (max-width:820px){body.foco #aba-editor .g2e{grid-template-columns:minmax(0,1fr)}body.foco .card h3 .sp~*{display:none}body.foco .edrow{flex-direction:column}body.foco #faixa{flex-direction:row;width:auto;height:64px;overflow-x:auto;overflow-y:hidden;touch-action:pan-x;align-items:center}body.foco #faixa .fh{width:2px;height:40px;padding:0;margin:0 4px;background:var(--bd);font-size:0;border-radius:2px}body.foco #faixa button{width:auto;flex:none}body.foco #faixa b{display:none}body.foco .leg{max-height:120px;flex-direction:row;flex-wrap:wrap}body.foco .li{grid-template-columns:30px}body.foco .li>:not(.sw){display:none}}
 .codebox{display:flex;align-items:center;gap:8px}
 .prevsq{width:34px;height:34px;flex:none;border-radius:8px;border:1px solid var(--bd);background:repeating-conic-gradient(#0000 0 25%,#8883 0 50%) 0 0/10px 10px}
 .prevsq.vazio{background:repeating-conic-gradient(#0000 0 25%,#8883 0 50%) 0 0/10px 10px}
@@ -268,7 +278,7 @@ body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 1
         <span class="gap"></span>
         <button class="btn sm" id="bPen" title="Ligado: só a Apple Pencil pinta; dedo e palma da mão só arrastam e dão zoom">✎ Apple Pencil: <b id="penTxt">desligado</b></button>
       </div>
-      <div class="edwrap" id="edWrap"><canvas id="edCv"></canvas></div>
+      <div class="edrow" id="edRow"><div class="edwrap" id="edWrap"><canvas id="edCv"></canvas></div><div id="faixa" aria-label="Cores"></div></div>
       <p class="hint" id="edInfo">&nbsp;</p>
     </div>
     <div>
@@ -1177,8 +1187,8 @@ function setFoco(on){document.body.classList.toggle('foco',on);$('#bFull').inner
   const de=document.documentElement,fs=document.fullscreenElement||document.webkitFullscreenElement;
   try{if(on&&!fs){const p=de.requestFullscreen?de.requestFullscreen():de.webkitRequestFullscreen&&de.webkitRequestFullscreen();if(p&&p.catch)p.catch(()=>{})}
       else if(!on&&fs){const p=document.exitFullscreen?document.exitFullscreen():document.webkitExitFullscreen&&document.webkitExitFullscreen();if(p&&p.catch)p.catch(()=>{})}}catch(_){}
-  setTimeout(()=>{altFoco();desenharEditor();if(on)ajustarZoom()},120)}
-function altFoco(){const w=$('#edWrap');if(document.body.classList.contains('foco')){w.style.height=Math.max(200,innerHeight-w.getBoundingClientRect().top-10)+'px'}else w.style.height=''}
+  renderFaixa();setTimeout(()=>{altFoco();desenharEditor();if(on)ajustarZoom()},120)}
+function altFoco(){const r=$('#edRow');if(document.body.classList.contains('foco')){window.scrollTo(0,0);r.style.height=Math.max(220,innerHeight-r.getBoundingClientRect().top-26)+'px'}else r.style.height=''}
 window.addEventListener('resize',()=>setTimeout(altFoco,60));
 $('#bFull').onclick=()=>{if(abaAtual!=='editor')abrirAba('editor');setFoco(!document.body.classList.contains('foco'))};
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!(document.fullscreenElement||document.webkitFullscreenElement)&&document.body.classList.contains('foco'))setFoco(false)}));
@@ -1207,9 +1217,13 @@ function abrirPal(){fecharPal();const cont=contagem();palEl=document.createEleme
   palEl.addEventListener('click',e=>{const b=e.target.closest('[data-pi]');if(!b)return;escolherCor(+b.dataset.pi);fecharPal()})}
 function escolherCor(i){ativo=i;if(tool!=='lapis'&&tool!=='balde')setTool(i<0?'borracha':'lapis');else if(i<0&&tool==='lapis')setTool('borracha');renderLegenda();if(P.view.destaque)pedirEd()}
 function setTool(t){tool=t;document.querySelectorAll('#tools [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===t));desenharEditor()}
+$('#faixa').addEventListener('click',e=>{const b=e.target.closest('[data-fi]');if(b)escolherCor(+b.dataset.fi)});
 $('#bCor').onclick=e=>{e.stopPropagation();palEl?fecharPal():abrirPal()};
 document.addEventListener('pointerdown',e=>{if(palEl&&!palEl.contains(e.target)&&!e.target.closest('#bCor'))fecharPal()},true);
-function renderLegenda(){syncCorBtn();const cont=contagem();const leg=$('#leg');const fe=FE(),feitos=new Array(P.cores.length).fill(0);let algum=false;P.cells.forEach((v,k)=>{if(v>=0&&fe[k]){feitos[v]++;algum=true}});$('#legTit').textContent='Legenda '+MAT().pref;
+function renderFaixa(){const f=$('#faixa');if(!f)return;const q=i=>{const d=i>=0?dmc(P.cores[i].code):null;return`<button data-fi="${i}" class="${ativo===i?'on':''}" title="${d?MAT().pref+' '+d.code+' — '+d.name:'Vazio'}"><span class="q" style="background:${d?d.hex:'#fbf9f3'};color:${d?(lumi(d)>140?'#1a1a1a':'#fff'):'#999'}">${d?P.cores[i].sym:'∅'}</span><b>${d?d.code:'vazio'}</b></button>`};
+  f.innerHTML=q(-1)+secoes().map(sc=>(sc.nome?`<div class="fh" title="${sc.nome.replace(/"/g,'')}">${sc.nome.replace(/</g,'&lt;')}</div>`:'')+sc.idx.map(q).join('')).join('');
+  const on=f.querySelector('.on');if(on&&document.body.classList.contains('foco')){const fr=f.getBoundingClientRect(),or=on.getBoundingClientRect();if(or.top<fr.top||or.bottom>fr.bottom)f.scrollTop+=or.top-fr.top-fr.height/2+or.height/2;if(or.left<fr.left||or.right>fr.right)f.scrollLeft+=or.left-fr.left-fr.width/2+or.width/2}}
+function renderLegenda(){syncCorBtn();renderFaixa();const cont=contagem();const leg=$('#leg');const fe=FE(),feitos=new Array(P.cores.length).fill(0);let algum=false;P.cells.forEach((v,k)=>{if(v>=0&&fe[k]){feitos[v]++;algum=true}});$('#legTit').textContent='Legenda '+MAT().pref;
   let h=`<div class="li ${ativo===-1?'on':''}" data-i="-1"><div class="sw" style="background:#fbf9f3;color:#999">∅</div><div class="nm" style="grid-column:span 2">Vazio<small>${P.material==='hama'?'pino sem conta':'tecido / grade sem ponto'}</small></div><div></div><div></div></div>`;
   for(const sc of secoes()){if(sc.nome)h+=`<div class="lgh">${sc.nome.replace(/</g,'&lt;')}</div>`;for(const i of sc.idx){const c=P.cores[i];const d=dmc(c.code);const n=cont[i],li=linhaInfo(n);
     h+=`<div class="li ${ativo===i?'on':''}" data-i="${i}"><div class="sw" style="background:${d.hex};color:${lumi(d)>140?'#1a1a1a':'#fff'}">${c.sym}</div>
