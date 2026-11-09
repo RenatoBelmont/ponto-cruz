@@ -2,13 +2,13 @@
 <html lang="pt-BR" data-tema="escuro">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Ponto Cruz — Planejador</title>
 <style>
 :root{--bg:#141416;--sf:#1c1c1f;--sf2:#242428;--bd:#2f2f35;--tx:#ececef;--mu:#9b9ba5;--ac:#e8875b;--ok:#5bbf8a;--warn:#e6b450;--err:#e5646b;--c1:#e8875b;--c2:#4fb3a9;--c3:#e6b450;--c4:#a48be0;--r:14px;--paper:#fbf9f3}
 [data-tema=claro]{--bg:#f3f2ee;--sf:#ffffff;--sf2:#f5f4f0;--bd:#e2e0d9;--tx:#1d1d20;--mu:#6b6b73}
 *{box-sizing:border-box}
-html,body{margin:0}
+html,body{margin:0;touch-action:manipulation;overscroll-behavior:none}
 body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
 button,input,select,textarea{font:inherit;color:inherit}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
@@ -71,6 +71,7 @@ main{max-width:1440px;margin:0 auto;padding:16px 20px 40px}
 .edwrap{overflow:auto;max-height:74vh;border-radius:10px;background:var(--sf2);padding:12px}
 #edCv{display:block;margin:auto;background:var(--paper)}
 .leg{display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow:auto;margin:0 -6px;padding:0 6px}
+.lgh{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);padding:10px 6px 2px;font-weight:700}
 .li{display:grid;grid-template-columns:30px 74px 1fr auto auto;gap:8px;align-items:center;padding:6px;border-radius:9px;border:1px solid transparent;cursor:pointer}
 .li:hover{background:var(--sf2)}
 .li.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 10%,var(--sf2))}
@@ -97,6 +98,17 @@ table.tl td{padding:6px;border-bottom:1px solid var(--bd)}
 .modal .box p{margin:0 0 16px}
 .modal .acts{display:flex;gap:8px;justify-content:flex-end}
 #printArea{display:none}
+.sw2{width:20px;height:20px;border-radius:5px;border:1px solid #0004;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+#bCor b{min-width:38px;text-align:left}
+.pal{position:fixed;z-index:70;background:var(--sf);border:1px solid var(--bd);border-radius:14px;box-shadow:0 18px 50px -12px #000c;padding:10px;max-height:70vh;overflow:auto;width:min(360px,calc(100vw - 16px));touch-action:pan-y}
+.pal h4{margin:8px 2px 6px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu)}
+.pal .chips{display:flex;flex-wrap:wrap;gap:6px}
+.pal button{display:flex;align-items:center;gap:6px;border:1px solid var(--bd);background:var(--sf2);border-radius:9px;padding:4px 8px 4px 4px;cursor:pointer;font-size:12.5px}
+.pal button.on{border-color:var(--ac);box-shadow:0 0 0 2px color-mix(in srgb,var(--ac) 40%,transparent)}
+#lupa{position:fixed;z-index:80;width:132px;height:132px;pointer-events:none;display:none}
+#lupa canvas{width:132px;height:132px}
+body.foco #aba-editor .g2e{grid-template-columns:minmax(0,1fr)!important}
+body.foco #aba-editor .g2e>div:last-child{display:none}
 body.foco header,body.foco nav,body.foco .stats{display:none}
 body.foco main{max-width:none;padding:8px}
 body.foco #aba-editor .g2e{gap:8px;grid-template-columns:minmax(0,1fr) 300px}
@@ -193,8 +205,8 @@ body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 1
             <option value="todas" id="optTodas">Todas as cores DMC do catálogo</option>
             <option value="lista" id="optLista">Só as linhas desta lista ↓</option>
           </select></div>
-        <div class="f" id="listaBox" style="margin-top:8px"><textarea id="vCodigos" rows="2" placeholder="Ex.: B5200 747 518 762 414 3799 721 666 3777 3346 699 727"></textarea>
-          <span class="hint" id="hintLista">Códigos separados por espaço ou vírgula — use as linhas que você já tem.</span></div>
+        <div class="f" id="listaBox" style="margin-top:8px"><textarea id="vCodigos" rows="6" placeholder="Ex.: B5200 747 518 762 414 3799 721 666 3777 3346 699 727"></textarea>
+          <span class="hint" id="hintLista"></span><div id="secInfo" class="hint"></div></div>
         <div class="sep"></div>
         <label class="chk"><input type="checkbox" id="vFundo"> Remover fundo (vira tecido sem ponto)</label>
         <div class="row" id="fundoBox" style="margin-top:8px">
@@ -230,8 +242,9 @@ body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 1
         <button class="btn sm" data-t="conta" title="Pegar cor do gráfico (I)">⊙ Conta-gotas</button>
         <button class="btn sm" data-t="feito" title="Marcar pontos já feitos — toque de novo para desmarcar (D)">✓ Feito</button>
         <span class="gap"></span>
-        <button class="btn sm" id="bUndo" title="Desfazer">↶</button>
-        <button class="btn sm" id="bRedo" title="Refazer">↷</button>
+        <button class="btn sm" id="bCor" title="Cor atual — toque para trocar"><span class="sw2" id="corSw"></span><b id="corTxt" class="mono"></b></button>
+        <button class="btn sm" id="bUndo" title="Desfazer (dois dedos)">↶</button>
+        <button class="btn sm" id="bRedo" title="Refazer (três dedos)">↷</button>
         <span class="gap"></span>
         <button class="btn sm" id="bZm">−</button>
         <span class="mono muted" id="zoomV" style="min-width:42px;text-align:center"></span>
@@ -354,6 +367,7 @@ body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 1
 </main>
 
 <div class="modal" id="modal"><div class="box"><p id="mMsg"></p><div class="acts"><button class="btn" id="mNo">Cancelar</button><button class="btn pri" id="mSim">Confirmar</button></div></div></div>
+<div id="lupa"><canvas id="lupaCv" width="264" height="264"></canvas></div>
 <div id="printArea"><img id="printImg" alt=""></div>
 
 <script>
@@ -547,7 +561,8 @@ $('#bDescortar').onclick=()=>{if(!FONTES.length)return;P.fonte=FONTES.pop();carr
 $('#bCropAll').onclick=()=>{if(!IMG)return;P.crop={x:0,y:0,w:IMG.width,h:IMG.height};if(C().lock)ajustarAltura();syncConvUI();desenharCrop();agendarPrev();salvar()};
 $('#bPickFundo').onclick=()=>{pickFundo=!pickFundo;$('#bPickFundo').classList.toggle('on',pickFundo)};
 
-function syncConvUI(){const c=C();setVal('vW',c.w);setVal('vH',c.h);$('#vLock').checked=c.lock;$('#vH').disabled=c.lock&&!!P.crop;$('#vAmostra').value=c.amostra;setVal('vMax',c.maxCores);$('#vPaleta').value=c.paleta;
+function mostrarSecoes(){const r=parseLista(C().codigos);$('#secInfo').innerHTML=r.grupos.length?'Seções: '+r.grupos.map(g=>`<b>${g.nome}</b> (${g.codes.length})`).join(' · '):''}
+function syncConvUI(){const c=C();mostrarSecoes();setVal('vW',c.w);setVal('vH',c.h);$('#vLock').checked=c.lock;$('#vH').disabled=c.lock&&!!P.crop;$('#vAmostra').value=c.amostra;setVal('vMax',c.maxCores);$('#vPaleta').value=c.paleta;
   $('#vCodigos').value=c.codigos;$('#listaBox').hidden=c.paleta!=='lista';$('#vFundo').checked=c.fundo;$('#fundoBox').style.display=c.fundo?'flex':'none';$('#vFundoCor').value=c.fundoCor;$('#vTol').value=c.fundoTol;$('#tolV').textContent=c.fundoTol;$('#vLimpar').checked=c.limpar}
 function lerConvUI(){const c=C();c.lock=$('#vLock').checked;if(c.lock&&P.crop)ajustarAltura();
   c.amostra=$('#vAmostra').value;c.paleta=$('#vPaleta').value;c.codigos=$('#vCodigos').value;c.fundo=$('#vFundo').checked;c.fundoCor=$('#vFundoCor').value;c.fundoTol=+$('#vTol').value;c.limpar=$('#vLimpar').checked}
@@ -557,7 +572,22 @@ const convMudou=()=>{syncConvUI();desenharCrop();agendarPrev();salvar()};
 bindNum('vW',{min:4,max:300,int:true},v=>{C().w=v;if(C().lock&&P.crop)ajustarAltura();convMudou()},syncConvUI);
 bindNum('vH',{min:4,max:300,int:true},v=>{C().h=v;convMudou()},syncConvUI);
 bindNum('vMax',{min:1,max:80,int:true},v=>{C().maxCores=v;convMudou()},syncConvUI);
-function paletaPermitida(){const c=C();if(c.paleta==='lista'){const cods=[...new Set(c.codigos.split(/[\s,;]+/).map(normCod).filter(Boolean))];if(cods.length)return{lista:cods.map(dmc),inval:c.codigos.split(/[\s,;]+/).filter(s=>s&&!normCod(s))}}return{lista:MAT().lista,inval:[]}}
+// Lê a lista de linhas. Aceita seções: "Siri: 606, 666, 946 e 721." — uma por linha.
+const LIGA=new Set(['e','and','y','ou','&','+']);
+function parseLista(txt){const grupos=[],codes=[],inval=[];
+  for(const linha of String(txt||'').split(/\n+/)){let l=linha.replace(/^[\s*•·\-–—>]+/,'').trim();if(!l)continue;let nome=null,corpo=l;const k=l.indexOf(':');
+    if(k>0){nome=l.slice(0,k).trim();corpo=l.slice(k+1)}
+    const gc=[];for(const t0 of corpo.split(/[\s,;.\/()]+/)){const t=t0.trim();if(!t||LIGA.has(t.toLowerCase()))continue;const c=normCod(t);if(c){if(!gc.includes(c))gc.push(c);if(!codes.includes(c))codes.push(c)}else inval.push(t)}
+    if(nome&&gc.length)grupos.push({nome,codes:gc})}
+  return{grupos,codes,inval}}
+function paletaPermitida(){const c=C();if(c.paleta==='lista'){const r=parseLista(c.codigos);if(r.codes.length)return{lista:r.codes.map(dmc),inval:r.inval}}return{lista:MAT().lista,inval:[]}}
+// Ordem por tom: neutros (cinzas/brancos/pretos) primeiro, depois por família de cor (vermelho → laranja → amarelo → verde → azul → roxo), do claro ao escuro
+function chaveTom(d){const[L,a,b]=d.lab,Cc=Math.hypot(a,b);if(Cc<11)return[0,0,-L];const h=(Math.atan2(b,a)*180/Math.PI+360-10)%360;return[1,Math.floor(h/30),-L]}
+const cmpTom=(x,y)=>{const a=chaveTom(x),b=chaveTom(y);return a[0]-b[0]||a[1]-b[1]||a[2]-b[2]};
+// Seções da legenda: as da lista (na ordem escrita) + "Outras"
+function secoes(){const{grupos}=parseLista(C().codigos);const sec=grupos.map(g=>({nome:g.nome,idx:[]})),outras={nome:grupos.length?'Outras':null,idx:[]};
+  P.cores.forEach((c,i)=>{const g=grupos.findIndex(g=>g.codes.includes(c.code));(g>=0?sec[g]:outras).idx.push(i)});
+  const all=sec.concat([outras]).filter(s=>s.idx.length);all.forEach(s=>s.idx.sort((i,j)=>cmpTom(dmc(P.cores[i].code),dmc(P.cores[j].code))));return all}
 function converter(){if(!IMG||!P.crop)return null;const c=C(),W=c.w,H=c.h,cr=P.crop;
   const k=Math.max(2,Math.min(8,Math.floor(2400/Math.max(W,H))));const cv=document.createElement('canvas');cv.width=W*k;cv.height=H*k;
   const x=cv.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(IMG,cr.x,cr.y,cr.w,cr.h,0,0,W*k,H*k);
@@ -617,33 +647,58 @@ function desenharEditor(){if(abaAtual!=='editor')return;const cs=P.view.zoom,dpr
   $('#zoomV').textContent=cs+'px';$('#eSim').checked=P.view.simbolos;syncPen();$('#eDest').checked=!!P.view.destaque;$('#eCor').checked=P.view.cores;edCv.style.touchAction='none';edCv.style.cursor=tool==='mover'?'grab':'crosshair';
   setVal('rW',P.w);setVal('rH',P.h)}
 let rafEd=0;const pedirEd=()=>{if(!rafEd)rafEd=requestAnimationFrame(()=>{rafEd=0;desenharEditor()})};
+function celulaXY(x,y){const r=edCv.getBoundingClientRect();const cs=P.view.zoom;const i=Math.floor((x-r.left-1)/cs),j=Math.floor((y-r.top-1)/cs);return(i>=0&&j>=0&&i<P.w&&j<P.h)?{i,j}:null}
 function celula(e){const r=edCv.getBoundingClientRect();const cs=P.view.zoom;const i=Math.floor((e.clientX-r.left-1)/cs),j=Math.floor((e.clientY-r.top-1)/cs);return(i>=0&&j>=0&&i<P.w&&j<P.h)?{i,j}:null}
 let valorFeito=1;
 function pintar(c){const k=c.i+c.j*P.w;if(tool==='feito'){if(P.cells[k]>=0)FE()[k]=valorFeito;return}const v=tool==='borracha'?-1:ativo;if(tool==='lapis'&&ativo<0&&!P.cores.length)return;if(P.cells[k]!==v)FE()[k]=0;P.cells[k]=v}
 function balde(c,v){const W=P.w,H=P.h,alvo=P.cells[c.i+c.j*W];if(alvo===v)return;const st=[c.i+c.j*W];const fe=FE();while(st.length){const k=st.pop();if(P.cells[k]!==alvo)continue;P.cells[k]=v;fe[k]=0;const i=k%W,j=(k/W)|0;if(i>0)st.push(k-1);if(i<W-1)st.push(k+1);if(j>0)st.push(k-W);if(j<H-1)st.push(k+W)}}
 // Mover: arrasta a área do gráfico (mouse ou dedo)
-let PAN=null,PEN_DOWN=false,PINCH=null,ABORTAR=()=>{};const TOQUES=new Map();
+let PAN=null,PEN_DOWN=false,PINCH=null,ABORTAR=()=>{},GEST=null,LP=null,CG=null;const TOQUES=new Map();
+// ---- conta-gotas com lupa (segurar o dedo) ----
+function lupaEm(x,y){const c=celulaXY(x,y);if(!c)return;const v=P.cells[c.i+c.j*P.w];CG.cand=v;
+  const L=$('#lupa'),cv=$('#lupaCv'),g=cv.getContext('2d'),S=264,R0=S/2;L.style.display='block';
+  L.style.left=Math.max(4,Math.min(innerWidth-136,x-66))+'px';L.style.top=(y-180<4?y+50:y-180)+'px';
+  g.clearRect(0,0,S,S);g.save();g.beginPath();g.arc(R0,R0,R0-22,0,7);g.clip();g.fillStyle='#fbf9f3';g.fillRect(0,0,S,S);
+  const r=edCv.getBoundingClientRect(),dpr=edCv.width/r.width,cs=P.view.zoom,src=Math.max(5,7*cs)*dpr;g.imageSmoothingEnabled=false;
+  g.drawImage(edCv,(x-r.left)*dpr-src/2,(y-r.top)*dpr-src/2,src,src,0,0,S,S);
+  const cel=S*cs*dpr/src;g.strokeStyle='#1a1a1a';g.lineWidth=3;const ox=R0-((x-r.left)*dpr-(1+c.i*cs)*dpr)*S/src,oy=R0-((y-r.top)*dpr-(1+c.j*cs)*dpr)*S/src;g.strokeRect(ox,oy,cel,cel);g.restore();
+  const nova=v>=0?dmc(P.cores[v].code).hex:'#fbf9f3',velha=ativo>=0&&P.cores[ativo]?dmc(P.cores[ativo].code).hex:'#fbf9f3';
+  g.lineWidth=20;g.strokeStyle=nova;g.beginPath();g.arc(R0,R0,R0-12,Math.PI,0);g.stroke();g.strokeStyle=velha;g.beginPath();g.arc(R0,R0,R0-12,0,Math.PI);g.stroke();
+  g.lineWidth=2;g.strokeStyle='rgba(0,0,0,.45)';g.beginPath();g.arc(R0,R0,R0-2,0,7);g.stroke();g.beginPath();g.arc(R0,R0,R0-22,0,7);g.stroke();
+  info(c)}
+function iniciarConta(e){ABORTAR();PAN=null;CG={id:e.pointerId,cand:undefined};lupaEm(e.clientX,e.clientY)}
+function fimConta(){if(!CG)return;const v=CG.cand;CG=null;$('#lupa').style.display='none';if(v!==undefined){ativo=v;setTool(v<0?'borracha':'lapis');renderLegenda();if(P.view.destaque)pedirEd()}}
 const ehDedo=e=>P.view.penOnly&&e.pointerType==='touch';
 (function(){const wrap=$('#edWrap');
   const meio=()=>{const p=[...TOQUES.values()];return{x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2,d:Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)||1}};
   edCv.addEventListener('pointerdown',e=>{
     if(e.pointerType==='pen'){PEN_DOWN=true;PAN=null;PINCH=null;if(!P.view.penOnly&&!P.view.penVisto){P.view.penOnly=true;P.view.penVisto=true;syncPen();salvar();setStatus('Apple Pencil detectada: o dedo agora só arrasta (botão no topo do editor)')}}
-    if(e.pointerType==='touch'){TOQUES.set(e.pointerId,{x:e.clientX,y:e.clientY});capturar(e);
+    if(e.altKey&&e.pointerType==='mouse'){e.preventDefault();CG={id:e.pointerId};lupaEm(e.clientX,e.clientY);capturar(e);return}
+    if(e.pointerType==='touch'){TOQUES.set(e.pointerId,{x:e.clientX,y:e.clientY,x0:e.clientX,y0:e.clientY});capturar(e);
+      if(TOQUES.size===1){clearTimeout(LP&&LP.t);LP={id:e.pointerId,x:e.clientX,y:e.clientY,t:setTimeout(()=>{if(LP&&TOQUES.size===1&&!PINCH){iniciarConta({pointerId:LP.id,clientX:LP.x,clientY:LP.y});LP=null}},420)};GEST=null}
+      else{if(LP){clearTimeout(LP.t);LP=null}if(CG){CG=null;$('#lupa').style.display='none'}if(!GEST)GEST={t0:performance.now(),max:0,moveu:false};GEST.max=Math.max(GEST.max,TOQUES.size)}
       if(TOQUES.size===2&&!PEN_DOWN){ABORTAR();PAN=null;const m=meio(),r=wrap.getBoundingClientRect();PINCH={d0:m.d,z0:P.view.zoom,cx:(wrap.scrollLeft+m.x-r.left)/P.view.zoom,cy:(wrap.scrollTop+m.y-r.top)/P.view.zoom};e.preventDefault();return}
       if(TOQUES.size>2)return}
     if(PINCH)return;
-    const dedoConta=tool==='conta'&&ehDedo(e);
+    if(tool==='conta'&&ehDedo(e)){if(LP){clearTimeout(LP.t);LP=null}CG={id:e.pointerId};lupaEm(e.clientX,e.clientY);return}
+    const dedoConta=false;
     if(!(tool==='mover'||ehDedo(e)))return;e.preventDefault();if(PEN_DOWN)return;capturar(e);
     PAN={x:e.clientX,y:e.clientY,id:e.pointerId,t:performance.now(),sl:wrap.scrollLeft,st:wrap.scrollTop,wy:window.scrollY,moveu:false,conta:dedoConta};edCv.style.cursor='grabbing'});
   edCv.addEventListener('pointermove',e=>{
-    if(TOQUES.has(e.pointerId))TOQUES.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(CG&&e.pointerId===CG.id){lupaEm(e.clientX,e.clientY);return}
+    if(TOQUES.has(e.pointerId)){const t=TOQUES.get(e.pointerId);t.x=e.clientX;t.y=e.clientY;const d=Math.hypot(t.x-t.x0,t.y-t.y0);
+      if(LP&&LP.id===e.pointerId&&d>9){clearTimeout(LP.t);LP=null}if(GEST&&d>14)GEST.moveu=true}
     if(PINCH&&TOQUES.size>=2){const m=meio(),r=wrap.getBoundingClientRect();const nz=Math.max(4,Math.min(48,Math.round(PINCH.z0*m.d/PINCH.d0)));
       if(nz!==P.view.zoom){P.view.zoom=nz;desenharEditor()}wrap.scrollLeft=PINCH.cx*P.view.zoom-(m.x-r.left);wrap.scrollTop=PINCH.cy*P.view.zoom-(m.y-r.top);return}
     const pan=PAN;if(!pan||e.pointerId!==pan.id)return;const dx=e.clientX-pan.x,dy=e.clientY-pan.y;if(Math.abs(dx)+Math.abs(dy)>6)pan.moveu=true;wrap.scrollLeft=pan.sl-dx;
     const maxT=wrap.scrollHeight-wrap.clientHeight;const alvo=pan.st-dy;wrap.scrollTop=alvo;
     if(maxT<=0||alvo<0||alvo>maxT)window.scrollTo(0,pan.wy-(dy-(pan.st-wrap.scrollTop)))});
   const fim=e=>{if(e.pointerType==='pen')PEN_DOWN=false;
-    if(TOQUES.delete(e.pointerId)&&PINCH&&TOQUES.size<2){PINCH=null;salvar();PAN=null;return}
+    if(CG&&e.pointerId===CG.id){fimConta();TOQUES.delete(e.pointerId);return}
+    if(LP&&LP.id===e.pointerId){clearTimeout(LP.t);LP=null}
+    const eraToque=TOQUES.delete(e.pointerId);
+    if(eraToque&&TOQUES.size===0&&GEST){const g=GEST;GEST=null;if(!g.moveu&&performance.now()-g.t0<450&&e.type==='pointerup'){if(PINCH){PINCH=null;PAN=null}if(g.max===2){$('#bUndo').click();setStatus('Desfeito (dois dedos)')}else if(g.max>=3){$('#bRedo').click();setStatus('Refeito (três dedos)')}return}}
+    if(eraToque&&PINCH&&TOQUES.size<2){PINCH=null;salvar();PAN=null;return}
     if(PAN&&e.pointerId===PAN.id){const pan=PAN;PAN=null;edCv.style.cursor=tool==='mover'?'grab':'crosshair';
       if(pan.conta&&!pan.moveu&&e.type==='pointerup'){const c=celula(e);if(c){ativo=P.cells[c.i+c.j*P.w];if(P.view.destaque)pedirEd();renderLegenda();info(c)}}}};
   edCv.addEventListener('pointerup',fim);edCv.addEventListener('pointercancel',fim);
@@ -651,17 +706,19 @@ const ehDedo=e=>P.view.penOnly&&e.pointerType==='touch';
     const r=wrap.getBoundingClientRect(),fx=(wrap.scrollLeft+e.clientX-r.left)/P.view.zoom,fy=(wrap.scrollTop+e.clientY-r.top)/P.view.zoom;P.view.zoom=nz;desenharEditor();wrap.scrollLeft=fx*nz-(e.clientX-r.left);wrap.scrollTop=fy*nz-(e.clientY-r.top);salvar()},{passive:false})})();
 (function(){let des=false,ult=null,pid=null;
   // segundo dedo encostou durante um traço feito com o dedo: vira pinça e o traço é desfeito
-  ABORTAR=()=>{if(!des)return;des=false;pid=null;if(undo.length){const s0=undo.pop();P.cells=s0.cells;P.cores=s0.cores;P.w=s0.w;P.h=s0.h}desenharEditor()};
-  edCv.addEventListener('pointerdown',e=>{if(tool==='mover'||ehDedo(e)||des||PINCH||(e.pointerType==='touch'&&TOQUES.size>1))return;const c=celula(e);if(!c)return;e.preventDefault();
-    if(tool==='conta'){ativo=P.cells[c.i+c.j*P.w];if(P.view.destaque)pedirEd();renderLegenda();info(c);return}
-    pushUndo();if(tool==='balde'){balde(c,ativo);desenharEditor();renderLegenda();tudoMudou();return}
+  let redoSalvo=null,baldePend=null;ABORTAR=()=>{baldePend=null;if(!des)return;des=false;pid=null;if(undo.length){const s0=undo.pop();P.cells=s0.cells;P.cores=s0.cores;P.w=s0.w;P.h=s0.h;P.feito=s0.feito}if(redoSalvo)redo=redoSalvo;desenharEditor()};
+  edCv.addEventListener('pointerdown',e=>{if(CG||tool==='mover'||ehDedo(e)||des||PINCH||(e.pointerType==='touch'&&TOQUES.size>1))return;const c=celula(e);if(!c)return;e.preventDefault();
+    if(tool==='conta'){CG={id:e.pointerId};capturar(e);lupaEm(e.clientX,e.clientY);return}
+    if(tool==='balde'&&e.pointerType==='touch'){baldePend={c,id:e.pointerId};return}
+    redoSalvo=redo.slice();pushUndo();if(tool==='balde'){balde(c,ativo);desenharEditor();renderLegenda();tudoMudou();return}
     capturar(e);des=true;pid=e.pointerId;ult=c;if(tool==='feito')valorFeito=FE()[c.i+c.j*P.w]?0:1;pintar(c);pedirEd()});
-  edCv.addEventListener('pointermove',e=>{if(des&&e.pointerId!==pid)return;const c=celula(e);if(c)info(c);if(!des||!c)return;
+  edCv.addEventListener('pointermove',e=>{if(CG||(des&&e.pointerId!==pid))return;const c=celula(e);if(c)info(c);if(!des||!c)return;
     let x0=ult.i,y0=ult.j;const dx=Math.abs(c.i-x0),dy=-Math.abs(c.j-y0),sx=x0<c.i?1:-1,sy=y0<c.j?1:-1;let er=dx+dy;
     for(;;){pintar({i:x0,j:y0});if(x0===c.i&&y0===c.j)break;const e2=2*er;if(e2>=dy){er+=dy;x0+=sx}if(e2<=dx){er+=dx;y0+=sy}}ult=c;pedirEd()});
-  const fim=e=>{if(des&&e.pointerId===pid){des=false;pid=null;renderLegenda();tudoMudou()}};edCv.addEventListener('pointerup',fim);edCv.addEventListener('pointercancel',fim)})();
+  const fim=e=>{if(baldePend&&e.pointerId===baldePend.id){const b=baldePend;baldePend=null;if(e.type==='pointerup'&&!CG&&!GEST&&!PINCH){pushUndo();balde(b.c,ativo);desenharEditor();renderLegenda();tudoMudou()}return}
+    if(des&&e.pointerId===pid){des=false;pid=null;renderLegenda();tudoMudou()}};edCv.addEventListener('pointerup',fim);edCv.addEventListener('pointercancel',fim)})();
 function info(c){const v=P.cells[c.i+c.j*P.w];const d=corDe(v);$('#edInfo').innerHTML=`Coluna <b class="mono">${c.i+1}</b> · Linha <b class="mono">${c.j+1}</b> · ${d?`${MAT().pref} <b>${d.code}</b> ${d.name}`:'vazio'}`}
-$('#tools').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;tool=b.dataset.t;document.querySelectorAll('#tools [data-t]').forEach(x=>x.classList.toggle('on',x===b));desenharEditor()});
+$('#tools').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;setTool(b.dataset.t)});
 function zoomPara(nz){const w=$('#edWrap');nz=Math.max(4,Math.min(48,nz));const cx=(w.scrollLeft+w.clientWidth/2)/P.view.zoom,cy=(w.scrollTop+w.clientHeight/2)/P.view.zoom;P.view.zoom=nz;desenharEditor();w.scrollLeft=cx*nz-w.clientWidth/2;w.scrollTop=cy*nz-w.clientHeight/2;salvar()}
 function ajustarZoom(){const w=$('#edWrap');const aw=w.clientWidth-26,ah=(document.body.classList.contains('foco')?w.clientHeight:Math.min(w.clientHeight||innerHeight*0.74,innerHeight*0.74))-26;
   P.view.zoom=Math.max(4,Math.min(48,Math.floor(Math.min(aw/P.w,ah/P.h))));desenharEditor();w.scrollLeft=w.scrollTop=0;salvar()}
@@ -671,7 +728,9 @@ function setFoco(on){document.body.classList.toggle('foco',on);$('#bFull').inner
   const de=document.documentElement,fs=document.fullscreenElement||document.webkitFullscreenElement;
   try{if(on&&!fs){const p=de.requestFullscreen?de.requestFullscreen():de.webkitRequestFullscreen&&de.webkitRequestFullscreen();if(p&&p.catch)p.catch(()=>{})}
       else if(!on&&fs){const p=document.exitFullscreen?document.exitFullscreen():document.webkitExitFullscreen&&document.webkitExitFullscreen();if(p&&p.catch)p.catch(()=>{})}}catch(_){}
-  setTimeout(()=>{desenharEditor();if(on)ajustarZoom()},120)}
+  setTimeout(()=>{altFoco();desenharEditor();if(on)ajustarZoom()},120)}
+function altFoco(){const w=$('#edWrap');if(document.body.classList.contains('foco')){w.style.height=Math.max(200,innerHeight-w.getBoundingClientRect().top-10)+'px'}else w.style.height=''}
+window.addEventListener('resize',()=>setTimeout(altFoco,60));
 $('#bFull').onclick=()=>{if(abaAtual!=='editor')abrirAba('editor');setFoco(!document.body.classList.contains('foco'))};
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!(document.fullscreenElement||document.webkitFullscreenElement)&&document.body.classList.contains('foco'))setFoco(false)}));
 document.addEventListener('keydown',e=>{if(abaAtual!=='editor'||e.ctrlKey||e.metaKey||e.altKey||e.target.matches('input,textarea,select'))return;const k=e.key.toLowerCase();
@@ -690,14 +749,25 @@ $('#bPen').onclick=()=>{P.view.penOnly=!P.view.penOnly;P.view.penVisto=true;sync
 $('#eCor').onchange=e=>{P.view.cores=e.target.checked;desenharEditor();salvar()};
 
 function proxSimbolo(){const usados=new Set(P.cores.map(c=>c.sym));return SYMS.find(s=>!usados.has(s))||'?'}
-function renderLegenda(){const cont=contagem();const leg=$('#leg');const fe=FE(),feitos=new Array(P.cores.length).fill(0);let algum=false;P.cells.forEach((v,k)=>{if(v>=0&&fe[k]){feitos[v]++;algum=true}});$('#legTit').textContent='Legenda '+MAT().pref;
+function syncCorBtn(){const d=ativo>=0&&P.cores[ativo]?dmc(P.cores[ativo].code):null;const sw=$('#corSw');sw.style.background=d?d.hex:'#fbf9f3';sw.style.color=d?(lumi(d)>140?'#1a1a1a':'#fff'):'#999';sw.textContent=d?P.cores[ativo].sym:'∅';$('#corTxt').textContent=d?d.code:'vazio'}
+let palEl=null;function fecharPal(){if(palEl){palEl.remove();palEl=null}}
+function abrirPal(){fecharPal();const cont=contagem();palEl=document.createElement('div');palEl.className='pal';
+  const chip=(i)=>{const d=i>=0?dmc(P.cores[i].code):null;return`<button data-pi="${i}" class="${ativo===i?'on':''}"><span class="sw2" style="background:${d?d.hex:'#fbf9f3'};color:${d?(lumi(d)>140?'#1a1a1a':'#fff'):'#999'}">${d?P.cores[i].sym:'∅'}</span>${d?d.code:'vazio'}${d&&cont[i]?`<small class="muted">${fmt(cont[i])}</small>`:''}</button>`};
+  palEl.innerHTML=`<div class="chips">${chip(-1)}</div>`+secoes().map(sc=>`${sc.nome?`<h4>${sc.nome.replace(/</g,'&lt;')}</h4>`:'<h4>Cores</h4>'}<div class="chips">${sc.idx.map(chip).join('')}</div>`).join('');
+  document.body.appendChild(palEl);const r=$('#bCor').getBoundingClientRect();palEl.style.top=Math.min(r.bottom+6,innerHeight-120)+'px';palEl.style.left=Math.max(8,Math.min(r.left,innerWidth-palEl.offsetWidth-8))+'px';
+  palEl.addEventListener('click',e=>{const b=e.target.closest('[data-pi]');if(!b)return;escolherCor(+b.dataset.pi);fecharPal()})}
+function escolherCor(i){ativo=i;if(tool!=='lapis'&&tool!=='balde')setTool(i<0?'borracha':'lapis');else if(i<0&&tool==='lapis')setTool('borracha');renderLegenda();if(P.view.destaque)pedirEd()}
+function setTool(t){tool=t;document.querySelectorAll('#tools [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===t));desenharEditor()}
+$('#bCor').onclick=e=>{e.stopPropagation();palEl?fecharPal():abrirPal()};
+document.addEventListener('pointerdown',e=>{if(palEl&&!palEl.contains(e.target)&&!e.target.closest('#bCor'))fecharPal()},true);
+function renderLegenda(){syncCorBtn();const cont=contagem();const leg=$('#leg');const fe=FE(),feitos=new Array(P.cores.length).fill(0);let algum=false;P.cells.forEach((v,k)=>{if(v>=0&&fe[k]){feitos[v]++;algum=true}});$('#legTit').textContent='Legenda '+MAT().pref;
   let h=`<div class="li ${ativo===-1?'on':''}" data-i="-1"><div class="sw" style="background:#fbf9f3;color:#999">∅</div><div class="nm" style="grid-column:span 2">Vazio<small>${P.material==='hama'?'pino sem conta':'tecido / grade sem ponto'}</small></div><div></div><div></div></div>`;
-  P.cores.forEach((c,i)=>{const d=dmc(c.code);const n=cont[i],li=linhaInfo(n);
+  for(const sc of secoes()){if(sc.nome)h+=`<div class="lgh">${sc.nome.replace(/</g,'&lt;')}</div>`;for(const i of sc.idx){const c=P.cores[i];const d=dmc(c.code);const n=cont[i],li=linhaInfo(n);
     h+=`<div class="li ${ativo===i?'on':''}" data-i="${i}"><div class="sw" style="background:${d.hex};color:${lumi(d)>140?'#1a1a1a':'#fff'}">${c.sym}</div>
     <input value="${c.code}" data-cod="${i}" autocomplete="off" aria-label="Código da cor"><div class="nm">${d.name}<small>${n?(P.material==='hama'?`${fmt(n)} ${MAT().un}`:`${fmt(li.m,1)} m · ${fmt(li.meadas,1)} meada`):'sem uso'}</small></div>
-    <div class="ct mono">${algum&&n?`<span style="color:${feitos[i]===n?'var(--ok)':'inherit'}">${fmt(feitos[i])}/${fmt(n)}</span>`:fmt(n)}</div><button class="x" data-del="${i}" title="Remover cor (pontos viram vazio)">✕</button></div>`});
+    <div class="ct mono">${algum&&n?`<span style="color:${feitos[i]===n?'var(--ok)':'inherit'}">${fmt(feitos[i])}/${fmt(n)}</span>`:fmt(n)}</div><button class="x" data-del="${i}" title="Remover cor (pontos viram vazio)">✕</button></div>`}}
   leg.innerHTML=h}
-$('#leg').addEventListener('click',e=>{const del=e.target.closest('[data-del]');if(del){removerCor(+del.dataset.del);return}if(e.target.matches('input'))return;const li=e.target.closest('.li');if(li){ativo=+li.dataset.i;if(P.view.destaque)pedirEd();if(tool==='borracha'||tool==='conta'||tool==='mover'){tool='lapis';document.querySelectorAll('#tools [data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t==='lapis'));desenharEditor()}renderLegenda()}});
+$('#leg').addEventListener('click',e=>{const del=e.target.closest('[data-del]');if(del){removerCor(+del.dataset.del);return}if(e.target.matches('input'))return;const li=e.target.closest('.li');if(li)escolherCor(+li.dataset.i)});
 $('#leg').addEventListener('change',e=>{const el=e.target.closest('[data-cod]');if(!el)return;const i=+el.dataset.cod;const cod=normCod(el.value);if(!cod){el.value=P.cores[i].code;setStatus(`Código ${MAT().pref} não encontrado`,true);return}
   const j=P.cores.findIndex(c=>c.code===cod);pushUndo();if(j>=0&&j!==i){for(let k=0;k<P.cells.length;k++)if(P.cells[k]===i)P.cells[k]=j;tirarIndice(i);ativo=j>i?j-1:j}else P.cores[i].code=cod;
   desenharEditor();renderLegenda();tudoMudou()});
@@ -773,7 +843,7 @@ $('#bExpGrade').onclick=()=>{const g=G(),c=caixa(),i0=c.b?c.b.x0:0,j0=c.b?c.b.y0
   baixar(new Blob([JSON.stringify(o,null,1)],{type:'application/json'}),`${slug()}_caixa_${c.w}x${c.d}.json`)};
 
 /* ---------- gráfico ---------- */
-function desenharGrafico(){$('#grafTit').textContent=P.material==='hama'?'Gráfico para montar':'Gráfico para bordar';const cv=$('#chartCv');const cont=contagem();const usadas=P.cores.map((c,i)=>({c,i,n:cont[i]})).filter(o=>o.n>0);
+function desenharGrafico(){$('#grafTit').textContent=P.material==='hama'?'Gráfico para montar':'Gráfico para bordar';const cv=$('#chartCv');const cont=contagem();const usadas=secoes().flatMap(sc=>sc.idx).map(i=>({c:P.cores[i],i,n:cont[i]})).filter(o=>o.n>0);
   const cs=Math.max(12,Math.min(30,Math.floor(1500/P.w)));const ml=44,mt=96;const gw=P.w*cs,gh=P.h*cs;const W=Math.max(gw+ml+40,760);
   const colL=Math.max(1,Math.floor((W-60)/360)),linL=Math.ceil(usadas.length/colL);const legH=60+linL*30+40;const H=mt+gh+30+legH;
   cv.width=W;cv.height=H;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);
@@ -818,7 +888,7 @@ $('#leg').addEventListener('focusin',e=>{const el=e.target.closest('[data-cod]')
 
 /* ---------- material ---------- */
 function syncMaterialUI(){const m=MAT(),H=P.material==='hama';$('#material').value=P.material;$('#lblCores').textContent=m.cores;$('#optTodas').textContent=m.todas;$('#vCodigos').placeholder=m.ex;
-  $('#optLista').textContent=H?'Só as cores Hama desta lista ↓':'Só as linhas desta lista ↓';$('#hintLista').textContent=H?'Códigos separados por espaço ou vírgula — use as cores de contas que você já tem.':'Códigos separados por espaço ou vírgula — use as linhas que você já tem.';
+  $('#optLista').textContent=H?'Só as cores Hama desta lista ↓':'Só as linhas desta lista ↓';$('#hintLista').innerHTML=(H?'Use as cores de contas que você já tem.':'Use as linhas que você já tem.')+' Pode separar por seções, uma por linha — <b>Siri: 606, 666 e 721</b> — e o editor agrupa as cores assim.';
   $('#lblAdd').textContent=H?'Adicionar cor de conta':'Adicionar linha';$('#hintLeg').textContent=H?'Toque no código de uma cor para trocar a conta. Se a nova já existir na legenda, as duas se juntam.':'Toque no código de uma cor para trocar a linha. Se a nova já existir na legenda, as duas se juntam.';
   $('#addCod').value='';atualizarPrev();fecharPicker();document.querySelector('[data-aba=grade]').lastChild.textContent='3 · '+(P.material==='hama'?'Placas':'Peça')}
 $('#material').onchange=async e=>{const novo=e.target.value;if(novo===P.material)return;
@@ -830,6 +900,11 @@ $('#material').onchange=async e=>{const novo=e.target.value;if(novo===P.material
   C().codigos=P.codigosMat[novo]||'';if(!C().codigos&&C().paleta==='lista')C().paleta='todas';
   if(novo==='hama'&&P.view.zoom<12)P.view.zoom=12;
   syncMaterialUI();syncConvUI();agendarPrev();renderLegenda();desenharEditor();if(abaAtual==='grade')renderGrade();if(abaAtual==='grafico')desenharGrafico();tudoMudou()};
+
+/* ---------- sem zoom da página (só no editor) ---------- */
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+let ultToque=0;document.addEventListener('touchend',e=>{const t=Date.now();if(t-ultToque<320&&!e.target.closest('button,input,textarea,select,label,a,.pick,.pal,.li'))e.preventDefault();ultToque=t},{passive:false});
+document.addEventListener('dblclick',e=>e.preventDefault());
 
 /* ---------- topo ---------- */
 $('#nome').addEventListener('input',e=>{P.nome=e.target.value;salvar()});
