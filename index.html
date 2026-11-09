@@ -76,7 +76,7 @@ main{max-width:1440px;margin:0 auto;padding:16px 20px 40px}
 .prevbox canvas{max-width:100%;image-rendering:pixelated}
 .toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .toolbar .gap{width:1px;height:24px;background:var(--bd);margin:0 4px}
-.edwrap{overflow:auto;max-height:74vh;border-radius:10px;background:var(--sf2);padding:12px}
+.edwrap{overflow:auto;max-height:74vh;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border-radius:10px;background:var(--sf2);padding:12px}
 #edCv{display:block;margin:auto;background:var(--paper)}
 .leg{display:flex;flex-direction:column;gap:4px;max-height:60vh;overflow:auto;margin:0 -6px;padding:0 6px}
 .lgh{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--mu);padding:10px 6px 2px;font-weight:700}
@@ -106,6 +106,9 @@ table.tl td{padding:6px;border-bottom:1px solid var(--bd)}
 .modal .box p{margin:0 0 16px}
 .modal .acts{display:flex;gap:8px;justify-content:flex-end}
 #printArea{display:none}
+html.foco-h,body.foco{overflow:hidden;height:100%;position:fixed;inset:0;width:100%}
+body.foco main{height:100%;overflow:hidden}
+#versao{font-size:10.5px;color:var(--mu);opacity:.7}
 #sug{margin-top:8px;display:flex;flex-direction:column;gap:6px}
 #sug .op{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;border:1px solid var(--bd);background:var(--sf2);border-radius:10px;padding:8px 10px;cursor:pointer;width:100%}
 #sug .op:hover,#sug .op.on{border-color:var(--ac)}
@@ -169,7 +172,7 @@ body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 1
   </div>
   <input id="nome" type="text" value="Sem título" aria-label="Nome do projeto">
   <select id="material" class="inp" style="width:auto;padding:6px 9px" aria-label="Material"><option value="dmc">✕ Ponto cruz</option><option value="hama">● Hama Beads</option></select>
-  <div id="status"><i></i><span>Salvo localmente</span></div>
+  <div id="status"><i></i><span>Salvo localmente</span><small id="versao">v09/11 19:14</small></div>
   <button class="btn sm" id="bNovo">Novo</button>
   <button class="btn sm" id="bAbrir">Abrir .json</button>
   <button class="btn sm" id="bSalvar">Salvar .json</button>
@@ -1168,7 +1171,8 @@ function desenharLinhas(x,cs,ox,oy){for(let i=0;i<=P.w;i++){const f=i%10===0;x.s
   for(let j=0;j<=P.h;j++){const f=j%10===0;x.strokeStyle=f?'rgba(0,0,0,.6)':'rgba(0,0,0,.16)';x.lineWidth=f?1.4:1;x.beginPath();x.moveTo(ox,oy+j*cs+.5);x.lineTo(ox+P.w*cs,oy+j*cs+.5);x.stroke()}
   if(P.material==='hama'){const n=P.hama.placa;x.strokeStyle='rgba(79,179,169,.95)';x.lineWidth=2.5;x.beginPath();for(let i=n;i<P.w;i+=n){x.moveTo(ox+i*cs+.5,oy);x.lineTo(ox+i*cs+.5,oy+P.h*cs)}for(let j=n;j<P.h;j+=n){x.moveTo(ox,oy+j*cs+.5);x.lineTo(ox+P.w*cs,oy+j*cs+.5)}x.stroke()}
   x.strokeStyle='rgba(232,135,91,.85)';x.lineWidth=1.5;const cx=ox+P.w*cs/2,cy=oy+P.h*cs/2;x.setLineDash([4,4]);x.beginPath();x.moveTo(cx,oy);x.lineTo(cx,oy+P.h*cs);x.moveTo(ox,cy);x.lineTo(ox+P.w*cs,cy);x.stroke();x.setLineDash([])}
-function desenharEditor(){if(abaAtual!=='editor')return;const cs=P.view.zoom,dpr=window.devicePixelRatio||1;const W=P.w*cs+2,H=P.h*cs+2;
+const AREA_MAX=15e6;
+function desenharEditor(){if(abaAtual!=='editor')return;let cs=P.view.zoom;const zmax=Math.max(4,Math.floor(Math.sqrt(AREA_MAX/(P.w*P.h))));if(cs>zmax)cs=P.view.zoom=zmax;const W=P.w*cs+2,H=P.h*cs+2,dpr=Math.max(1,Math.min(window.devicePixelRatio||1,Math.sqrt(AREA_MAX/(W*H))));
   edCv.width=W*dpr;edCv.height=H*dpr;edCv.style.width=W+'px';edCv.style.height=H+'px';const x=edCv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
   x.fillStyle='#fbf9f3';x.fillRect(0,0,W,H);desenharCelulas(x,cs,1,1,{cores:P.view.cores,simbolos:P.view.simbolos,extras:true});desenharLinhas(x,cs,1,1);
   $('#zoomV').textContent=cs+'px';$('#eSim').checked=P.view.simbolos;syncPen();syncFaixa();$('#eDest').checked=!!P.view.destaque;$('#eCor').checked=P.view.cores;edCv.style.touchAction='none';edCv.style.cursor=tool==='mover'?'grab':'crosshair';
@@ -1218,8 +1222,8 @@ const ehDedo=e=>P.view.penOnly&&e.pointerType==='touch';
     if(PINCH&&TOQUES.size>=2){const m=meio(),r=wrap.getBoundingClientRect();const nz=Math.max(4,Math.min(48,Math.round(PINCH.z0*m.d/PINCH.d0)));
       if(nz!==P.view.zoom){P.view.zoom=nz;desenharEditor()}wrap.scrollLeft=PINCH.cx*P.view.zoom-(m.x-r.left);wrap.scrollTop=PINCH.cy*P.view.zoom-(m.y-r.top);return}
     const pan=PAN;if(!pan||e.pointerId!==pan.id)return;const dx=e.clientX-pan.x,dy=e.clientY-pan.y;if(Math.abs(dx)+Math.abs(dy)>6)pan.moveu=true;wrap.scrollLeft=pan.sl-dx;
-    const maxT=wrap.scrollHeight-wrap.clientHeight;const alvo=pan.st-dy;wrap.scrollTop=alvo;
-    if(maxT<=0||alvo<0||alvo>maxT)window.scrollTo(0,pan.wy-(dy-(pan.st-wrap.scrollTop)))});
+    wrap.scrollTop=pan.st-dy;
+});
   const fim=e=>{if(e.pointerType==='pen')PEN_DOWN=false;
     if(CG&&e.pointerId===CG.id){fimConta();TOQUES.delete(e.pointerId);return}
     if(LP&&LP.id===e.pointerId){clearTimeout(LP.t);LP=null}
@@ -1251,12 +1255,12 @@ function ajustarZoom(){const w=$('#edWrap');const aw=w.clientWidth-26,ah=(docume
   P.view.zoom=Math.max(4,Math.min(48,Math.floor(Math.min(aw/P.w,ah/P.h))));desenharEditor();w.scrollLeft=w.scrollTop=0;salvar()}
 $('#bFit').onclick=ajustarZoom;
 $('#eDest').onchange=e=>{P.view.destaque=e.target.checked;desenharEditor();salvar()};
-function setFoco(on){document.body.classList.toggle('foco',on);$('#bFull').innerHTML=on?'✕ Sair da tela cheia':'⛶ Tela cheia';
+function setFoco(on){document.body.classList.toggle('foco',on);document.documentElement.classList.toggle('foco-h',on);$('#bFull').innerHTML=on?'✕ Sair da tela cheia':'⛶ Tela cheia';
   const de=document.documentElement,fs=document.fullscreenElement||document.webkitFullscreenElement;
   try{if(on&&!fs){const p=de.requestFullscreen?de.requestFullscreen():de.webkitRequestFullscreen&&de.webkitRequestFullscreen();if(p&&p.catch)p.catch(()=>{})}
       else if(!on&&fs){const p=document.exitFullscreen?document.exitFullscreen():document.webkitExitFullscreen&&document.webkitExitFullscreen();if(p&&p.catch)p.catch(()=>{})}}catch(_){}
   renderFaixa();setTimeout(()=>{altFoco();desenharEditor();if(on)ajustarZoom()},120)}
-function altFoco(){const r=$('#edRow');if(document.body.classList.contains('foco')){window.scrollTo(0,0);r.style.height=Math.max(220,innerHeight-r.getBoundingClientRect().top-26)+'px'}else r.style.height=''}
+function altFoco(){const r=$('#edRow');if(document.body.classList.contains('foco')){r.style.height=Math.max(220,innerHeight-r.getBoundingClientRect().top-26)+'px'}else r.style.height=''}
 window.addEventListener('resize',()=>setTimeout(altFoco,60));
 $('#bFull').onclick=()=>{if(abaAtual!=='editor')abrirAba('editor');setFoco(!document.body.classList.contains('foco'))};
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(!(document.fullscreenElement||document.webkitFullscreenElement)&&document.body.classList.contains('foco'))setFoco(false)}));
@@ -1378,7 +1382,7 @@ $('#bExpGrade').onclick=()=>{const g=G(),c=caixa(),i0=c.b?c.b.x0:0,j0=c.b?c.b.y0
 
 /* ---------- gráfico ---------- */
 function desenharGrafico(){$('#grafTit').textContent=P.material==='hama'?'Gráfico para montar':'Gráfico para bordar';const cv=$('#chartCv');const cont=contagem();const usadas=secoes().flatMap(sc=>sc.idx).map(i=>({c:P.cores[i],i,n:cont[i]})).filter(o=>o.n>0);
-  const cs=Math.max(12,Math.min(30,Math.floor(1500/P.w)));const ml=44,mt=96;const gw=P.w*cs,gh=P.h*cs;const W=Math.max(gw+ml+40,760);
+  const cs=Math.max(6,Math.min(Math.max(12,Math.min(30,Math.floor(1500/P.w))),Math.floor(Math.sqrt(AREA_MAX*0.8/(P.w*P.h)))));const ml=44,mt=96;const gw=P.w*cs,gh=P.h*cs;const W=Math.max(gw+ml+40,760);
   const colL=Math.max(1,Math.floor((W-60)/360)),linL=Math.ceil(usadas.length/colL);const legH=60+linL*30+40;const H=mt+gh+30+legH;
   cv.width=W;cv.height=H;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);
   x.fillStyle='#1d1d20';x.font='700 26px system-ui,sans-serif';x.textAlign='left';x.textBaseline='alphabetic';x.fillText(P.nome||'Ponto Cruz',ml,40);

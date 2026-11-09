@@ -4,6 +4,7 @@ Uso:  python3 build.py
 Depois de mudar qualquer coisa em src/, rode de novo e faça o commit do index.html.
 Também troca a versão do cache do sw.js para o iPad baixar a versão nova.
 """
+import datetime
 import hashlib
 import pathlib
 import re
@@ -39,7 +40,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 </script>
 </body>"""
 
-html = app.replace("/*DMC*/", dmc)
+html = app.replace("/*DMC*/", dmc).replace("/*VERSAO*/", "v" + datetime.datetime.now().strftime("%d/%m %H:%M"))
 html = html.replace("<title>", head_pwa + "<title>", 1)
 html = html.replace("</body>", sw, 1)
 (raiz / "index.html").write_text(html, encoding="utf-8")

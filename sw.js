@@ -1,6 +1,6 @@
 // Guarda o app no iPad para abrir sem internet.
 // A versão muda sozinha a cada `python3 build.py`, e aí o iPad baixa a versão nova.
-const VERSAO = '6e9eb627ba';
+const VERSAO = '9fc1e10185';
 const CACHE = 'ponto-cruz-' + VERSAO;
 const ARQUIVOS = [
   './',
