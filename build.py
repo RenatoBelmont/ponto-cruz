@@ -24,7 +24,17 @@ head_pwa = """<meta name="theme-color" content="#1c1c1f">
 
 sw = """<script>
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  // Ao sair uma versão nova, o app instalado troca sozinho (recarrega uma vez).
+  const tinhaControle = !!navigator.serviceWorker.controller;
+  let recarregou = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinhaControle && !recarregou) { recarregou = true; location.reload(); } });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      const checar = () => reg.update().catch(() => {});
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checar(); });
+      setInterval(checar, 30 * 60 * 1000);
+    }).catch(() => {});
+  });
 }
 </script>
 </body>"""

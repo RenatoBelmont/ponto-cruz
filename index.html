@@ -126,6 +126,8 @@ body.foco .edwrap{max-height:none;height:100%}
 .edrow{display:flex;gap:8px;min-height:0}
 .edrow .edwrap{flex:1;min-width:0}
 #faixa{display:none}
+.so-foco{display:none!important}body.foco .so-foco{display:inline-flex!important}
+body.foco.sem-faixa #faixa{display:none!important}
 body.foco #faixa{display:flex;flex-direction:column;gap:4px;width:92px;flex:none;overflow-y:auto;overflow-x:hidden;background:var(--sf2);border-radius:10px;padding:6px;touch-action:pan-y;overscroll-behavior:contain}
 #faixa>*{flex:none}
 #faixa .fh{font-size:9.5px;line-height:1.15;text-transform:uppercase;letter-spacing:.4px;color:var(--mu);font-weight:700;margin:6px 2px 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -272,6 +274,7 @@ body.foco #bFull{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 1
         <label class="chk" title="Apaga as outras cores para você ver só onde vai a cor selecionada (S)"><input type="checkbox" id="eDest"> Destacar cor</label>
         <span class="gap"></span>
         <button class="btn sm" id="bFull" title="Tela cheia (F) — Esc sai">⛶ Tela cheia</button>
+        <button class="btn sm so-foco" id="bFaixa" title="Mostrar ou ocultar as cores na lateral (C)">▥ Cores: <b id="faixaTxt">visíveis</b></button>
         <span class="gap"></span>
         <label class="chk"><input type="checkbox" id="eSim"> Símbolos</label>
         <label class="chk"><input type="checkbox" id="eCor"> Cores</label>
@@ -1103,7 +1106,7 @@ function desenharLinhas(x,cs,ox,oy){for(let i=0;i<=P.w;i++){const f=i%10===0;x.s
 function desenharEditor(){if(abaAtual!=='editor')return;const cs=P.view.zoom,dpr=window.devicePixelRatio||1;const W=P.w*cs+2,H=P.h*cs+2;
   edCv.width=W*dpr;edCv.height=H*dpr;edCv.style.width=W+'px';edCv.style.height=H+'px';const x=edCv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
   x.fillStyle='#fbf9f3';x.fillRect(0,0,W,H);desenharCelulas(x,cs,1,1,{cores:P.view.cores,simbolos:P.view.simbolos,extras:true});desenharLinhas(x,cs,1,1);
-  $('#zoomV').textContent=cs+'px';$('#eSim').checked=P.view.simbolos;syncPen();$('#eDest').checked=!!P.view.destaque;$('#eCor').checked=P.view.cores;edCv.style.touchAction='none';edCv.style.cursor=tool==='mover'?'grab':'crosshair';
+  $('#zoomV').textContent=cs+'px';$('#eSim').checked=P.view.simbolos;syncPen();syncFaixa();$('#eDest').checked=!!P.view.destaque;$('#eCor').checked=P.view.cores;edCv.style.touchAction='none';edCv.style.cursor=tool==='mover'?'grab':'crosshair';
   setVal('rW',P.w);setVal('rH',P.h)}
 let rafEd=0;const pedirEd=()=>{if(!rafEd)rafEd=requestAnimationFrame(()=>{rafEd=0;desenharEditor()})};
 function celulaXY(x,y){const r=edCv.getBoundingClientRect();const cs=P.view.zoom;const i=Math.floor((x-r.left-1)/cs),j=Math.floor((y-r.top-1)/cs);return(i>=0&&j>=0&&i<P.w&&j<P.h)?{i,j}:null}
@@ -1197,12 +1200,15 @@ document.addEventListener('keydown',e=>{if(abaAtual!=='editor'||e.ctrlKey||e.met
   if(tools[k]){const b=document.querySelector(`#tools [data-t="${tools[k]}"]`);b&&b.click();e.preventDefault()}
   else if(k==='f'){$('#bFull').click();e.preventDefault()}
   else if(k==='s'){$('#eDest').click();e.preventDefault()}
+  else if(k==='c'&&document.body.classList.contains('foco')){$('#bFaixa').click();e.preventDefault()}
   else if(k==='0'){ajustarZoom();e.preventDefault()}
   else if(k==='+'||k==='='){$('#bZp').click();e.preventDefault()}
   else if(k==='-'){$('#bZm').click();e.preventDefault()}
   else if(k==='escape'&&document.body.classList.contains('foco')&&!pickEl){setFoco(false)}});
 $('#bZm').onclick=()=>zoomPara(P.view.zoom-2);$('#bZp').onclick=()=>zoomPara(P.view.zoom+2);
 $('#eSim').onchange=e=>{P.view.simbolos=e.target.checked;desenharEditor();salvar()};
+function syncFaixa(){const on=P.view.faixa!==false;document.body.classList.toggle('sem-faixa',!on);$('#bFaixa').classList.toggle('on',on);$('#faixaTxt').textContent=on?'visíveis':'ocultas'}
+$('#bFaixa').onclick=()=>{P.view.faixa=P.view.faixa===false;syncFaixa();salvar();setTimeout(()=>{altFoco();desenharEditor();ajustarZoom()},60)};
 function syncPen(){$('#bPen').classList.toggle('on',!!P.view.penOnly);$('#penTxt').textContent=P.view.penOnly?'ligado':'desligado'}
 $('#bPen').onclick=()=>{P.view.penOnly=!P.view.penOnly;P.view.penVisto=true;syncPen();salvar();setStatus(P.view.penOnly?'Só a caneta pinta; o dedo arrasta e dá zoom':'Dedo e caneta pintam')};
 $('#eCor').onchange=e=>{P.view.cores=e.target.checked;desenharEditor();salvar()};
@@ -1388,7 +1394,17 @@ carregar();init();setStatus('Salvo localmente');
 </script>
 <script>
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  // Ao sair uma versão nova, o app instalado troca sozinho (recarrega uma vez).
+  const tinhaControle = !!navigator.serviceWorker.controller;
+  let recarregou = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinhaControle && !recarregou) { recarregou = true; location.reload(); } });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      const checar = () => reg.update().catch(() => {});
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checar(); });
+      setInterval(checar, 30 * 60 * 1000);
+    }).catch(() => {});
+  });
 }
 </script>
 </body>
