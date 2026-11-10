@@ -19,8 +19,8 @@ head_pwa = """<meta name="theme-color" content="#1c1c1f">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Ponto Cruz">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="data:image/png;base64,__ICO180__">
+<link rel="icon" type="image/png" href="data:image/png;base64,__ICO64__">
 """
 
 sw = """<script>
@@ -43,6 +43,10 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
 html = app.replace("/*DMC*/", dmc).replace("/*VERSAO*/", "v" + datetime.datetime.now().strftime("%d/%m %H:%M"))
 html = html.replace("<title>", head_pwa + "<title>", 1)
 html = html.replace("</body>", sw, 1)
+import base64
+ico = lambda f: base64.b64encode((raiz / "icons" / f).read_bytes()).decode()
+# Ícones embutidos: o arquivo sozinho (ex.: cópia no Drive) também leva o ícone.
+html = html.replace("__ICO180__", ico("apple-touch-icon.png")).replace("__ICO64__", ico("favicon-64.png"))
 (raiz / "index.html").write_text(html, encoding="utf-8")
 
 versao = hashlib.sha1(html.encode()).hexdigest()[:10]
